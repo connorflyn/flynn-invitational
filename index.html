@@ -494,12 +494,16 @@
 
             dbRef.on('value', (snapshot) => {
                 const remoteState = snapshot.val();
-                if (remoteState) {
+                if (remoteState && Array.isArray(remoteState.teams) && remoteState.teams.length > 0) {
                     localState = remoteState;
                     if (!localState.roomCode) localState.roomCode = roomCode;
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(localState));
                     updateUI();
-                    lucide.createIcons();
+                    try { lucide.createIcons(); } catch (e) { console.warn('Icon render failed:', e); }
+                } else if (remoteState) {
+                    // Malformed data at this path (e.g. wiped by a bad write)
+                    // — don't let it crash the app, just warn and keep going.
+                    console.warn('Ignoring malformed room data:', remoteState);
                 } else {
                     // Nothing at this room path yet — seed it with our
                     // current local state so the room exists for others.
@@ -589,9 +593,13 @@
         });
 
         window.switchTab = function(tabName) {
+            // Toggle which section is visible FIRST, before any rendering
+            // runs, so the tab switch is visible even if a render function
+            // below throws on bad data. Nothing else can block this part.
             ['leaderboard', 'scorecard', 'setup'].forEach(t => {
                 const tabEl = document.getElementById(`tab-${t}`);
                 const btnEl = document.getElementById(`tab-btn-${t}`);
+                if (!tabEl || !btnEl) return;
                 if (t === tabName) {
                     tabEl.classList.remove('hidden');
                     btnEl.className = "flex-1 py-2 rounded-lg flex items-center justify-center gap-1 transition-all bg-gold-500 text-emerald-950 font-bold shadow-md";
@@ -602,14 +610,25 @@
             });
 
             updateUI();
-            lucide.createIcons();
+            try { lucide.createIcons(); } catch (e) { console.warn('Icon render failed:', e); }
         };
 
+        // Each render function runs independently so a bug in one
+        // (e.g. Setup) can't take down the others (e.g. Leaderboard).
         function updateUI() {
-            renderLeaderboard();
-            renderHolePills();
-            renderActiveHoleCard();
-            renderSetupDropdowns();
+            safeRun('renderLeaderboard', renderLeaderboard);
+            safeRun('renderHolePills', renderHolePills);
+            safeRun('renderActiveHoleCard', renderActiveHoleCard);
+            safeRun('renderSetupDropdowns', renderSetupDropdowns);
+        }
+
+        function safeRun(label, fn) {
+            try {
+                fn();
+            } catch (e) {
+                console.error(`${label} failed:`, e);
+                showToast(`${label} error: ${e.message}`, true);
+            }
         }
 
         function calculateTeamStats(team) {
@@ -1053,14 +1072,38 @@
             document.body.removeChild(textArea);
         }
 
-        function showToast(msg) {
+        function showToast(msg, isError) {
             const toast = document.getElementById('toast-message');
-            document.getElementById('toast-text').textContent = msg;
+            const textEl = document.getElementById('toast-text');
+            textEl.textContent = msg;
+            if (isError) {
+                toast.classList.remove('bg-gold-500', 'text-emerald-950');
+                toast.classList.add('bg-red-600', 'text-white');
+            } else {
+                toast.classList.remove('bg-red-600', 'text-white');
+                toast.classList.add('bg-gold-500', 'text-emerald-950');
+            }
             toast.classList.remove('opacity-0', 'pointer-events-none');
-            setTimeout(() => {
+            clearTimeout(window.__toastTimer);
+            window.__toastTimer = setTimeout(() => {
                 toast.classList.add('opacity-0', 'pointer-events-none');
-            }, 2500);
+            }, isError ? 6000 : 2500);
         }
+
+        // ---------------------------------------------------------------
+        // GLOBAL ERROR SURFACING
+        // If anything throws (bad Firebase data, a typo, whatever), show
+        // it as a red toast instead of failing completely silently. This
+        // makes bugs visible/debuggable on a phone with no dev console.
+        // ---------------------------------------------------------------
+        window.addEventListener('error', (e) => {
+            console.error('App error:', e.error || e.message);
+            showToast('Error: ' + (e.message || 'something went wrong'), true);
+        });
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('Unhandled promise rejection:', e.reason);
+            showToast('Error: ' + (e.reason && e.reason.message ? e.reason.message : 'sync failed'), true);
+        });
     </script>
 </body>
 </html>

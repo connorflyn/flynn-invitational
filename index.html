@@ -10,7 +10,11 @@
     
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    
+
+    <!-- Firebase (used for live, cross-device score sync) -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -407,6 +411,98 @@
 
         const STORAGE_KEY = 'FLYNN_INVITATIONAL_2026_STATE';
 
+        // ---------------------------------------------------------------
+        // FIREBASE CONFIG — REQUIRED FOR LIVE, MULTI-DEVICE SYNC
+        // ---------------------------------------------------------------
+        // 1. Go to https://console.firebase.google.com -> Add project (free).
+        // 2. In the project, click "Build > Realtime Database" -> Create
+        //    Database -> start in TEST MODE (fine for a casual golf outing).
+        // 3. Click the gear icon > Project settings > scroll to "Your apps"
+        //    > click the </> (web) icon > register app > copy the config
+        //    object it gives you and paste the values below.
+        // 4. Commit + push this file. That's it — no server to run.
+        //
+        // Without a valid config, the app still works, but falls back to
+        // localStorage only (each device has its own separate scores).
+        // ---------------------------------------------------------------
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        let db = null;
+        let dbRef = null;
+        let firebaseReady = false;
+        let suppressNextRemoteRender = false;
+
+        try {
+            if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                firebaseReady = true;
+            }
+        } catch (e) {
+            console.warn("Firebase init failed, falling back to local-only mode:", e);
+            firebaseReady = false;
+        }
+
+        function setSyncBadge(status) {
+            const badge = document.getElementById('room-code-badge');
+            if (!badge) return;
+            if (!firebaseReady) {
+                badge.textContent = "LOCAL ONLY";
+                badge.classList.remove('bg-gold-500/20', 'text-gold-400', 'border-gold-500/40');
+                badge.classList.add('bg-red-500/20', 'text-red-300', 'border-red-500/40');
+            } else if (status === 'connected') {
+                badge.textContent = "LIVE SYNC";
+                badge.className = "text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/40 font-mono font-bold";
+            } else {
+                badge.textContent = "CONNECTING…";
+                badge.className = "text-[10px] bg-gold-500/20 text-gold-400 px-2 py-0.5 rounded border border-gold-500/40 font-mono font-bold";
+            }
+        }
+
+        // Attaches (or re-attaches) the realtime listener for a given room
+        // code. Every device that opens the same room code shares one
+        // Firebase path, so score updates appear on everyone's screen.
+        function connectToRoom(roomCode) {
+            if (!firebaseReady) {
+                setSyncBadge('local');
+                return;
+            }
+
+            if (dbRef) {
+                dbRef.off(); // detach old listener before switching rooms
+            }
+
+            setSyncBadge('connecting');
+            dbRef = db.ref('rooms/' + roomCode);
+
+            dbRef.on('value', (snapshot) => {
+                const remoteState = snapshot.val();
+                if (remoteState) {
+                    localState = remoteState;
+                    if (!localState.roomCode) localState.roomCode = roomCode;
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(localState));
+                    updateUI();
+                    lucide.createIcons();
+                } else {
+                    // Nothing at this room path yet — seed it with our
+                    // current local state so the room exists for others.
+                    dbRef.set(localState);
+                }
+                setSyncBadge('connected');
+            }, (err) => {
+                console.warn("Firebase read failed:", err);
+                setSyncBadge('local');
+            });
+        }
+
         function createDefaultTournamentState() {
             return {
                 roomCode: "FLYNN26",
@@ -456,6 +552,11 @@
             } catch (e) {
                 console.warn("Error writing to localStorage:", e);
             }
+            // Push the full state up to Firebase so every other device
+            // watching this room code gets the update in real time.
+            if (firebaseReady && dbRef) {
+                dbRef.set(localState).catch(err => console.warn("Firebase write failed:", err));
+            }
             updateUI();
         }
 
@@ -465,15 +566,17 @@
             const roomParam = urlParams.get('room');
             if (roomParam) {
                 localState.roomCode = roomParam.toUpperCase().replace(/[^A-Z0-9]/g, '');
-                saveState();
             }
 
-            document.getElementById('input-room-code').value = localState.roomCode || "FLYNN26";
-            document.getElementById('display-room-code').textContent = localState.roomCode || "FLYNN26";
-            document.getElementById('room-code-badge').textContent = `ROOM: ${localState.roomCode || "FLYNN26"}`;
+            const activeRoom = localState.roomCode || "FLYNN26";
+            document.getElementById('input-room-code').value = activeRoom;
+            document.getElementById('display-room-code').textContent = activeRoom;
 
             updateUI();
             lucide.createIcons();
+
+            // Connect (or fall back to local-only mode) for this room.
+            connectToRoom(activeRoom);
         });
 
         window.switchTab = function(tabName) {
@@ -861,11 +964,14 @@
             if (!newCode) return;
 
             localState.roomCode = newCode;
-            document.getElementById('room-code-badge').textContent = `ROOM: ${newCode}`;
             document.getElementById('display-room-code').textContent = newCode;
-            
+
+            // Switching room codes means switching which Firebase path we
+            // read/write, so everyone needs to type the SAME code to see
+            // each other's scores.
+            connectToRoom(newCode);
             saveState();
-            showToast(`Session code updated to ${newCode}`);
+            showToast(`Session code updated to ${newCode} — share this code with your group`);
         };
 
         window.resetScoresToPar = function() {
@@ -881,7 +987,9 @@
         };
 
         window.resetFullTournament = function() {
+            const currentRoom = localState.roomCode;
             localState = createDefaultTournamentState();
+            localState.roomCode = currentRoom; // stay in the same live room
             activeHoleIdx = 0;
             activeScorecardTeamIdx = 0;
             saveState();

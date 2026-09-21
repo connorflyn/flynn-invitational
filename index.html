@@ -106,15 +106,15 @@
             </div>
 
             <div class="flex mt-3 bg-emerald-900/80 p-1 rounded-xl border border-gold-500/20 text-xs font-medium">
-                <button onclick="switchTab('leaderboard')" id="tab-btn-leaderboard" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 transition-all bg-gold-500 text-emerald-950 font-bold shadow-md">
+                <button id="tab-btn-leaderboard" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 transition-all bg-gold-500 text-emerald-950 font-bold shadow-md">
                     <i data-lucide="trophy" class="w-3.5 h-3.5"></i>
                     <span>Leaderboard</span>
                 </button>
-                <button onclick="switchTab('scorecard')" id="tab-btn-scorecard" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 transition-all text-emerald-200 hover:text-white">
+                <button id="tab-btn-scorecard" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 transition-all text-emerald-200 hover:text-white">
                     <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
                     <span>Scorecard</span>
                 </button>
-                <button onclick="switchTab('setup')" id="tab-btn-setup" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 transition-all text-emerald-200 hover:text-white">
+                <button id="tab-btn-setup" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 transition-all text-emerald-200 hover:text-white">
                     <i data-lucide="settings" class="w-3.5 h-3.5"></i>
                     <span>Setup</span>
                 </button>
@@ -139,7 +139,7 @@
                             <div class="text-[10px] text-emerald-300/80">Share room code or export summary</div>
                         </div>
                     </div>
-                    <button onclick="copyShareLink()" class="px-3 py-1.5 bg-gold-500 hover:bg-gold-400 text-emerald-950 font-bold text-xs rounded-lg flex items-center gap-1 active:scale-95 transition-transform flex-shrink-0">
+                    <button id="btn-copy-share-link" class="px-3 py-1.5 bg-gold-500 hover:bg-gold-400 text-emerald-950 font-bold text-xs rounded-lg flex items-center gap-1 active:scale-95 transition-transform flex-shrink-0">
                         <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
                         <span>Share</span>
                     </button>
@@ -151,7 +151,7 @@
                         <h2 class="font-serif font-bold text-base text-gold-400 flex items-center gap-1.5">
                             <i data-lucide="trophy" class="w-4 h-4"></i> Team Leaderboard
                         </h2>
-                        <button onclick="copyTextSummary()" class="text-[11px] bg-emerald-900 hover:bg-emerald-800 text-emerald-200 border border-emerald-700 px-2.5 py-1 rounded-lg flex items-center gap-1 transition-all">
+                        <button id="btn-copy-text-summary" class="text-[11px] bg-emerald-900 hover:bg-emerald-800 text-emerald-200 border border-emerald-700 px-2.5 py-1 rounded-lg flex items-center gap-1 transition-all">
                             <i data-lucide="copy" class="w-3 h-3 text-gold-400"></i> Text Summary
                         </button>
                     </div>
@@ -202,7 +202,7 @@
                 <div class="bg-emerald-900/50 p-3 rounded-xl border border-emerald-800/80 flex items-center justify-between gap-2">
                     <div class="flex-1">
                         <label class="text-[10px] uppercase font-bold text-emerald-400 block mb-0.5">Scoring For Team</label>
-                        <select id="scorecard-team-select" onchange="changeScorecardActiveTeam(this.value)" class="w-full bg-emerald-950 border border-emerald-700 text-white font-serif font-bold text-sm rounded-lg p-1.5 outline-none focus:border-gold-500">
+                        <select id="scorecard-team-select" class="w-full bg-emerald-950 border border-emerald-700 text-white font-serif font-bold text-sm rounded-lg p-1.5 outline-none focus:border-gold-500">
                             <!-- Options populated via JS -->
                         </select>
                     </div>
@@ -215,7 +215,7 @@
                 <!-- Hole Selector Navigation Bar -->
                 <div class="bg-emerald-900/80 rounded-xl p-2 border border-gold-500/20 shadow-md space-y-2">
                     <div class="flex items-center justify-between px-2">
-                        <button onclick="prevHole()" class="p-2 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-gold-400 active:scale-95 transition-transform">
+                        <button id="btn-prev-hole-top" class="p-2 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-gold-400 active:scale-95 transition-transform">
                             <i data-lucide="chevron-left" class="w-5 h-5"></i>
                         </button>
                         
@@ -224,7 +224,7 @@
                             <div id="current-hole-heading" class="font-serif font-bold text-xl text-gold-400">Hole 1</div>
                         </div>
 
-                        <button onclick="nextHole()" class="p-2 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-gold-400 active:scale-95 transition-transform">
+                        <button id="btn-next-hole-top" class="p-2 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-gold-400 active:scale-95 transition-transform">
                             <i data-lucide="chevron-right" class="w-5 h-5"></i>
                         </button>
                     </div>
@@ -265,9 +265,9 @@
                             <div class="text-[10px] text-emerald-400">Total strokes taken for this hole</div>
                         </div>
                         <div class="flex items-center gap-3">
-                            <button onclick="updateHoleScore(-1)" class="w-10 h-10 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-gold-400 font-bold text-xl flex items-center justify-center border border-emerald-700 active:scale-95 transition-all">-</button>
+                            <button id="btn-hole-score-minus" class="w-10 h-10 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-gold-400 font-bold text-xl flex items-center justify-center border border-emerald-700 active:scale-95 transition-all">-</button>
                             <span id="current-hole-score-display" class="font-bold text-2xl text-white w-8 text-center">4</span>
-                            <button onclick="updateHoleScore(1)" class="w-10 h-10 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-gold-400 font-bold text-xl flex items-center justify-center border border-emerald-700 active:scale-95 transition-all">+</button>
+                            <button id="btn-hole-score-plus" class="w-10 h-10 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-gold-400 font-bold text-xl flex items-center justify-center border border-emerald-700 active:scale-95 transition-all">+</button>
                         </div>
                     </div>
 
@@ -288,10 +288,10 @@
 
                 <!-- Next/Prev Bottom Nav Buttons -->
                 <div class="flex gap-2">
-                    <button onclick="prevHole()" class="flex-1 py-3 bg-emerald-900/60 hover:bg-emerald-800 text-emerald-200 rounded-xl font-semibold border border-emerald-800 flex items-center justify-center gap-1 active:scale-98 transition-transform text-xs">
+                    <button id="btn-prev-hole-bottom" class="flex-1 py-3 bg-emerald-900/60 hover:bg-emerald-800 text-emerald-200 rounded-xl font-semibold border border-emerald-800 flex items-center justify-center gap-1 active:scale-98 transition-transform text-xs">
                         <i data-lucide="arrow-left" class="w-4 h-4"></i> Previous Hole
                     </button>
-                    <button onclick="nextHole()" class="flex-1 py-3 bg-gold-500 hover:bg-gold-400 text-emerald-950 rounded-xl font-bold border border-gold-400 flex items-center justify-center gap-1 active:scale-98 transition-transform shadow-lg text-xs">
+                    <button id="btn-next-hole-bottom" class="flex-1 py-3 bg-gold-500 hover:bg-gold-400 text-emerald-950 rounded-xl font-bold border border-gold-400 flex items-center justify-center gap-1 active:scale-98 transition-transform shadow-lg text-xs">
                         Next Hole <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -310,7 +310,7 @@
                     
                     <div class="flex gap-2">
                         <input type="text" id="input-room-code" class="flex-1 bg-emerald-950 border border-emerald-700 text-white p-2.5 rounded-lg text-xs font-mono uppercase font-bold tracking-wider outline-none focus:border-gold-500" placeholder="e.g. LAKEGEORGE26">
-                        <button onclick="applyCustomRoomCode()" class="px-4 bg-gold-500 hover:bg-gold-400 text-emerald-950 font-bold text-xs rounded-lg active:scale-95 transition-transform">
+                        <button id="btn-apply-room-code" class="px-4 bg-gold-500 hover:bg-gold-400 text-emerald-950 font-bold text-xs rounded-lg active:scale-95 transition-transform">
                             Set Code
                         </button>
                     </div>
@@ -322,27 +322,27 @@
                         <h2 class="font-serif font-bold text-base text-gold-400 flex items-center gap-2">
                             <i data-lucide="users" class="w-4 h-4"></i> Manage Teams & Rosters
                         </h2>
-                        <button onclick="addNewTeam()" class="text-[10px] bg-emerald-800 hover:bg-emerald-700 text-gold-400 border border-emerald-600 px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-all">
+                        <button id="btn-add-team" class="text-[10px] bg-emerald-800 hover:bg-emerald-700 text-gold-400 border border-emerald-600 px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-all">
                             <i data-lucide="plus" class="w-3 h-3"></i> Add Team
                         </button>
                     </div>
 
                     <div>
                         <label class="text-[10px] uppercase font-bold text-emerald-400 block mb-1">Select Team To Edit</label>
-                        <select id="setup-team-select" onchange="renderSetupRoster(this.value)" class="w-full bg-emerald-950 border border-emerald-700 text-white p-2 rounded-lg text-xs font-bold outline-none focus:border-gold-500">
+                        <select id="setup-team-select" class="w-full bg-emerald-950 border border-emerald-700 text-white p-2 rounded-lg text-xs font-bold outline-none focus:border-gold-500">
                             <!-- Populated via JS -->
                         </select>
                     </div>
 
                     <div>
                         <label class="text-[10px] uppercase font-bold text-emerald-400 block mb-1">Team Name</label>
-                        <input type="text" id="setup-team-name-input" onchange="saveSetupTeamName(this.value)" class="w-full bg-emerald-950 border border-emerald-700 text-white p-2 rounded-lg text-xs font-bold outline-none focus:border-gold-500" placeholder="Team Name">
+                        <input type="text" id="setup-team-name-input" class="w-full bg-emerald-950 border border-emerald-700 text-white p-2 rounded-lg text-xs font-bold outline-none focus:border-gold-500" placeholder="Team Name">
                     </div>
 
                     <div>
                         <div class="flex justify-between items-center mb-1.5">
                             <label class="text-[10px] uppercase font-bold text-emerald-400">Player Rosters</label>
-                            <button onclick="addPlayerToCurrentTeam()" class="text-[10px] text-gold-400 hover:underline flex items-center gap-0.5">
+                            <button id="btn-add-player" class="text-[10px] text-gold-400 hover:underline flex items-center gap-0.5">
                                 <i data-lucide="user-plus" class="w-3 h-3"></i> Add Golfer
                             </button>
                         </div>
@@ -352,7 +352,7 @@
                     </div>
 
                     <div id="delete-team-container" class="pt-2 border-t border-emerald-800/60 hidden">
-                        <button onclick="removeCurrentTeam()" class="text-xs text-red-400 hover:text-red-300 font-medium flex items-center gap-1">
+                        <button id="btn-remove-team" class="text-xs text-red-400 hover:text-red-300 font-medium flex items-center gap-1">
                             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete Selected Team
                         </button>
                     </div>
@@ -365,10 +365,10 @@
                     </h2>
                     <p class="text-xs text-emerald-300/80">Wipe current hole scores back to par across all teams or start a completely fresh tournament setup.</p>
                     <div class="flex gap-2 pt-2">
-                        <button onclick="resetScoresToPar()" class="flex-1 py-2.5 bg-yellow-900/40 hover:bg-yellow-800/60 text-gold-300 border border-yellow-700/60 font-semibold text-xs rounded-lg active:scale-98 transition-transform">
+                        <button id="btn-reset-par" class="flex-1 py-2.5 bg-yellow-900/40 hover:bg-yellow-800/60 text-gold-300 border border-yellow-700/60 font-semibold text-xs rounded-lg active:scale-98 transition-transform">
                             Reset Scores to Par
                         </button>
-                        <button onclick="resetFullTournament()" class="flex-1 py-2.5 bg-red-900/40 hover:bg-red-800/60 text-red-200 border border-red-800/60 font-semibold text-xs rounded-lg active:scale-98 transition-transform">
+                        <button id="btn-reset-full" class="flex-1 py-2.5 bg-red-900/40 hover:bg-red-800/60 text-red-200 border border-red-800/60 font-semibold text-xs rounded-lg active:scale-98 transition-transform">
                             Full Factory Reset
                         </button>
                     </div>
@@ -585,12 +585,57 @@
             document.getElementById('input-room-code').value = activeRoom;
             document.getElementById('display-room-code').textContent = activeRoom;
 
+            bindStaticEventListeners();
             updateUI();
             lucide.createIcons();
 
             // Connect (or fall back to local-only mode) for this room.
             connectToRoom(activeRoom);
         });
+
+        // ---------------------------------------------------------------
+        // All click/change handlers are bound here with addEventListener
+        // instead of inline onclick="" / onchange="" HTML attributes.
+        // Some mobile browsers, privacy modes, and content blockers will
+        // silently refuse to run inline event handler attributes (no error
+        // is thrown — the button just does nothing), which is the likely
+        // cause if tabs/buttons appeared unresponsive before. Binding in
+        // JS like this works everywhere.
+        // ---------------------------------------------------------------
+        function bindStaticEventListeners() {
+            const on = (id, event, handler) => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener(event, handler);
+                else console.warn(`bindStaticEventListeners: #${id} not found`);
+            };
+
+            on('tab-btn-leaderboard', 'click', () => switchTab('leaderboard'));
+            on('tab-btn-scorecard', 'click', () => switchTab('scorecard'));
+            on('tab-btn-setup', 'click', () => switchTab('setup'));
+
+            on('btn-copy-share-link', 'click', copyShareLink);
+            on('btn-copy-text-summary', 'click', copyTextSummary);
+
+            on('scorecard-team-select', 'change', (e) => changeScorecardActiveTeam(e.target.value));
+
+            on('btn-prev-hole-top', 'click', prevHole);
+            on('btn-next-hole-top', 'click', nextHole);
+            on('btn-prev-hole-bottom', 'click', prevHole);
+            on('btn-next-hole-bottom', 'click', nextHole);
+
+            on('btn-hole-score-minus', 'click', () => updateHoleScore(-1));
+            on('btn-hole-score-plus', 'click', () => updateHoleScore(1));
+
+            on('btn-apply-room-code', 'click', applyCustomRoomCode);
+            on('btn-add-team', 'click', addNewTeam);
+            on('setup-team-select', 'change', (e) => renderSetupRoster(e.target.value));
+            on('setup-team-name-input', 'change', (e) => saveSetupTeamName(e.target.value));
+            on('btn-add-player', 'click', addPlayerToCurrentTeam);
+            on('btn-remove-team', 'click', removeCurrentTeam);
+
+            on('btn-reset-par', 'click', resetScoresToPar);
+            on('btn-reset-full', 'click', resetFullTournament);
+        }
 
         window.switchTab = function(tabName) {
             // Toggle which section is visible FIRST, before any rendering
@@ -795,20 +840,39 @@
                 const shotCount = (holeState.playerShots && holeState.playerShots[pIdx]) || 0;
                 const row = document.createElement('div');
                 row.className = "bg-emerald-900/60 p-2.5 rounded-xl border border-emerald-800 flex items-center justify-between";
-                
-                row.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 rounded-full bg-gold-500/20 text-gold-400 font-bold text-xs flex items-center justify-center border border-gold-500/30">
-                            ${pName.charAt(0).toUpperCase()}
-                        </div>
-                        <span class="text-xs font-semibold text-white">${pName}</span>
+
+                const infoDiv = document.createElement('div');
+                infoDiv.className = "flex items-center gap-2";
+                infoDiv.innerHTML = `
+                    <div class="w-6 h-6 rounded-full bg-gold-500/20 text-gold-400 font-bold text-xs flex items-center justify-center border border-gold-500/30">
+                        ${pName.charAt(0).toUpperCase()}
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="updatePlayerShot(${pIdx}, -1)" class="w-8 h-8 rounded-lg bg-emerald-950 hover:bg-emerald-800 text-emerald-200 font-bold text-base flex items-center justify-center border border-emerald-700 active:scale-95">-</button>
-                        <span class="font-bold text-sm text-gold-400 w-5 text-center">${shotCount}</span>
-                        <button onclick="updatePlayerShot(${pIdx}, 1)" class="w-8 h-8 rounded-lg bg-emerald-950 hover:bg-emerald-800 text-emerald-200 font-bold text-base flex items-center justify-center border border-emerald-700 active:scale-95">+</button>
-                    </div>
+                    <span class="text-xs font-semibold text-white">${pName}</span>
                 `;
+
+                const controlsDiv = document.createElement('div');
+                controlsDiv.className = "flex items-center gap-2";
+
+                const minusBtn = document.createElement('button');
+                minusBtn.className = "w-8 h-8 rounded-lg bg-emerald-950 hover:bg-emerald-800 text-emerald-200 font-bold text-base flex items-center justify-center border border-emerald-700 active:scale-95";
+                minusBtn.textContent = '-';
+                minusBtn.addEventListener('click', () => updatePlayerShot(pIdx, -1));
+
+                const countSpan = document.createElement('span');
+                countSpan.className = "font-bold text-sm text-gold-400 w-5 text-center";
+                countSpan.textContent = shotCount;
+
+                const plusBtn = document.createElement('button');
+                plusBtn.className = "w-8 h-8 rounded-lg bg-emerald-950 hover:bg-emerald-800 text-emerald-200 font-bold text-base flex items-center justify-center border border-emerald-700 active:scale-95";
+                plusBtn.textContent = '+';
+                plusBtn.addEventListener('click', () => updatePlayerShot(pIdx, 1));
+
+                controlsDiv.appendChild(minusBtn);
+                controlsDiv.appendChild(countSpan);
+                controlsDiv.appendChild(plusBtn);
+
+                row.appendChild(infoDiv);
+                row.appendChild(controlsDiv);
                 listContainer.appendChild(row);
             });
         }

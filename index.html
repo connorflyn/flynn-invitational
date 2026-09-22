@@ -83,8 +83,7 @@
             scrollbar-width: none;
         }
         
-        /* Tab visibility is intentionally handled outside Tailwind so the
-           navigation still works if the CDN has a transient problem. */
+        /* Tab visibility explicit CSS rules */
         .tab-panel-hidden {
             display: none !important;
         }
@@ -202,7 +201,7 @@
             </section>
 
             <!-- TAB 2: INTERACTIVE SCORECARD -->
-            <section id="tab-scorecard" class="space-y-4 hidden">
+            <section id="tab-scorecard" class="space-y-4 tab-panel-hidden hidden" hidden>
                 
                 <!-- Active Team Selector Dropdown -->
                 <div class="bg-emerald-900/50 p-3 rounded-xl border border-emerald-800/80 flex items-center justify-between gap-2">
@@ -305,7 +304,7 @@
             </section>
 
             <!-- TAB 3: SETUP & ROSTER MANAGEMENT -->
-            <section id="tab-setup" class="space-y-4 hidden">
+            <section id="tab-setup" class="space-y-4 tab-panel-hidden hidden" hidden>
                 
                 <!-- Match Room Session Generator -->
                 <div class="bg-emerald-900/40 p-4 rounded-xl border border-emerald-800 space-y-3">
@@ -417,29 +416,6 @@
 
         const STORAGE_KEY = 'FLYNN_INVITATIONAL_2026_STATE';
 
-        // ---------------------------------------------------------------
-        // FIREBASE CONFIG — REQUIRED FOR LIVE, MULTI-DEVICE SYNC
-        // ---------------------------------------------------------------
-        // 1. Go to https://console.firebase.google.com -> Add project (free).
-        // 2. In the project, click "Build > Realtime Database" -> Create
-        //    Database -> start in TEST MODE (fine for a casual golf outing).
-        // 3. Click the gear icon > Project settings > scroll to "Your apps"
-        //    > click the </> (web) icon > register app > copy the config
-        //    object it gives you and paste the values below.
-        // 4. Commit + push this file. That's it — no server to run.
-        //
-        // Without a valid config, the app still works, but falls back to
-        // localStorage only (each device has its own separate scores).
-        // ---------------------------------------------------------------
-        // const firebaseConfig = {
-        //     apiKey: "YOUR_API_KEY",
-        //     authDomain: "YOUR_PROJECT.firebaseapp.com",
-        //     databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
-        //     projectId: "YOUR_PROJECT",
-        //     storageBucket: "YOUR_PROJECT.appspot.com",
-        //     messagingSenderId: "YOUR_SENDER_ID",
-        //     appId: "YOUR_APP_ID"
-        // };
         const firebaseConfig = {
             apiKey: "AIzaSyAgrl9R0YF5XHyjzsoN5iJQQwiMpyl49Ug",
             authDomain: "flynn-invitational.firebaseapp.com",
@@ -448,12 +424,11 @@
             storageBucket: "flynn-invitational.firebasestorage.app",
             messagingSenderId: "394140283598",
             appId: "1:394140283598:web:3268b04be314aeb608d69f"
-          };
+        };
 
         let db = null;
         let dbRef = null;
         let firebaseReady = false;
-        let suppressNextRemoteRender = false;
 
         try {
             if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
@@ -482,9 +457,6 @@
             }
         }
 
-        // Attaches (or re-attaches) the realtime listener for a given room
-        // code. Every device that opens the same room code shares one
-        // Firebase path, so score updates appear on everyone's screen.
         function connectToRoom(roomCode) {
             if (!firebaseReady) {
                 setSyncBadge('local');
@@ -492,7 +464,7 @@
             }
 
             if (dbRef) {
-                dbRef.off(); // detach old listener before switching rooms
+                dbRef.off();
             }
 
             setSyncBadge('connecting');
@@ -507,12 +479,8 @@
                     updateUI();
                     try { lucide.createIcons(); } catch (e) { console.warn('Icon render failed:', e); }
                 } else if (remoteState) {
-                    // Malformed data at this path (e.g. wiped by a bad write)
-                    // — don't let it crash the app, just warn and keep going.
                     console.warn('Ignoring malformed room data:', remoteState);
                 } else {
-                    // Nothing at this room path yet — seed it with our
-                    // current local state so the room exists for others.
                     dbRef.set(localState);
                 }
                 setSyncBadge('connected');
@@ -571,8 +539,6 @@
             } catch (e) {
                 console.warn("Error writing to localStorage:", e);
             }
-            // Push the full state up to Firebase so every other device
-            // watching this room code gets the update in real time.
             if (firebaseReady && dbRef) {
                 dbRef.set(localState).catch(err => console.warn("Firebase write failed:", err));
             }
@@ -580,7 +546,6 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Check room query parameter from URL if available
             const urlParams = new URLSearchParams(window.location.search);
             const roomParam = urlParams.get('room');
             if (roomParam) {
@@ -595,19 +560,9 @@
             switchTab('leaderboard');
             lucide.createIcons();
 
-            // Connect (or fall back to local-only mode) for this room.
             connectToRoom(activeRoom);
         });
 
-        // ---------------------------------------------------------------
-        // All click/change handlers are bound here with addEventListener
-        // instead of inline onclick="" / onchange="" HTML attributes.
-        // Some mobile browsers, privacy modes, and content blockers will
-        // silently refuse to run inline event handler attributes (no error
-        // is thrown — the button just does nothing), which is the likely
-        // cause if tabs/buttons appeared unresponsive before. Binding in
-        // JS like this works everywhere.
-        // ---------------------------------------------------------------
         function bindStaticEventListeners() {
             const on = (id, event, handler) => {
                 const el = document.getElementById(id);
@@ -615,9 +570,7 @@
                 else console.warn(`bindStaticEventListeners: #${id} not found`);
             };
 
-            // Delegate tab clicks from the document. This is deliberately
-            // independent of the other app render functions, so a Firebase
-            // or leaderboard rendering issue cannot make the tabs unusable.
+            // Global Tab Delegation Handler
             document.addEventListener('click', (event) => {
                 const tabButton = event.target.closest('[data-tab]');
                 if (!tabButton) return;
@@ -660,8 +613,6 @@
 
                 const isActive = t === tabName;
 
-                // Use the native hidden property PLUS our own CSS class.
-                // This avoids relying on Tailwind's `hidden` utility.
                 tabEl.hidden = !isActive;
                 tabEl.classList.toggle('hidden', !isActive);
                 tabEl.classList.toggle('tab-panel-hidden', !isActive);
@@ -676,8 +627,6 @@
                 }
             });
 
-            // Keep the selected tab visible even if a render function below
-            // encounters malformed Firebase data.
             updateUI();
 
             try {
@@ -687,8 +636,6 @@
             }
         };
 
-        // Each render function runs independently so a bug in one
-        // (e.g. Setup) can't take down the others (e.g. Leaderboard).
         function updateUI() {
             safeRun('renderLeaderboard', renderLeaderboard);
             safeRun('renderHolePills', renderHolePills);
@@ -859,7 +806,6 @@
             const stats = calculateTeamStats(currentTeam);
             document.getElementById('scorecard-team-total').textContent = `${stats.diffFormatted} (${stats.totalStrokes})`;
 
-            // Populate player shot counters
             const listContainer = document.getElementById('player-shots-list');
             listContainer.innerHTML = '';
 
@@ -1087,9 +1033,6 @@
             localState.roomCode = newCode;
             document.getElementById('display-room-code').textContent = newCode;
 
-            // Switching room codes means switching which Firebase path we
-            // read/write, so everyone needs to type the SAME code to see
-            // each other's scores.
             connectToRoom(newCode);
             saveState();
             showToast(`Session code updated to ${newCode} — share this code with your group`);
@@ -1110,7 +1053,7 @@
         window.resetFullTournament = function() {
             const currentRoom = localState.roomCode;
             localState = createDefaultTournamentState();
-            localState.roomCode = currentRoom; // stay in the same live room
+            localState.roomCode = currentRoom;
             activeHoleIdx = 0;
             activeScorecardTeamIdx = 0;
             saveState();
@@ -1183,12 +1126,6 @@
             }, isError ? 6000 : 2500);
         }
 
-        // ---------------------------------------------------------------
-        // GLOBAL ERROR SURFACING
-        // If anything throws (bad Firebase data, a typo, whatever), show
-        // it as a red toast instead of failing completely silently. This
-        // makes bugs visible/debuggable on a phone with no dev console.
-        // ---------------------------------------------------------------
         window.addEventListener('error', (e) => {
             console.error('App error:', e.error || e.message);
             showToast('Error: ' + (e.message || 'something went wrong'), true);

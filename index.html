@@ -82,6 +82,12 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        
+        /* Tab visibility is intentionally handled outside Tailwind so the
+           navigation still works if the CDN has a transient problem. */
+        .tab-panel-hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-gold-500 selection:text-emerald-950">
@@ -106,15 +112,15 @@
             </div>
 
             <div class="flex mt-3 bg-emerald-900/80 p-1 rounded-xl border border-gold-500/20 text-xs font-medium">
-                <button id="tab-btn-leaderboard" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 transition-all bg-gold-500 text-emerald-950 font-bold shadow-md">
+                <button type="button" data-tab="leaderboard" id="tab-btn-leaderboard" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 transition-all bg-gold-500 text-emerald-950 font-bold shadow-md">
                     <i data-lucide="trophy" class="w-3.5 h-3.5"></i>
                     <span>Leaderboard</span>
                 </button>
-                <button id="tab-btn-scorecard" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 transition-all text-emerald-200 hover:text-white">
+                <button type="button" data-tab="scorecard" id="tab-btn-scorecard" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 transition-all text-emerald-200 hover:text-white">
                     <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
                     <span>Scorecard</span>
                 </button>
-                <button id="tab-btn-setup" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 transition-all text-emerald-200 hover:text-white">
+                <button type="button" data-tab="setup" id="tab-btn-setup" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 transition-all text-emerald-200 hover:text-white">
                     <i data-lucide="settings" class="w-3.5 h-3.5"></i>
                     <span>Setup</span>
                 </button>
@@ -586,7 +592,7 @@
             document.getElementById('display-room-code').textContent = activeRoom;
 
             bindStaticEventListeners();
-            updateUI();
+            switchTab('leaderboard');
             lucide.createIcons();
 
             // Connect (or fall back to local-only mode) for this room.
@@ -609,9 +615,15 @@
                 else console.warn(`bindStaticEventListeners: #${id} not found`);
             };
 
-            on('tab-btn-leaderboard', 'click', () => switchTab('leaderboard'));
-            on('tab-btn-scorecard', 'click', () => switchTab('scorecard'));
-            on('tab-btn-setup', 'click', () => switchTab('setup'));
+            // Delegate tab clicks from the document. This is deliberately
+            // independent of the other app render functions, so a Firebase
+            // or leaderboard rendering issue cannot make the tabs unusable.
+            document.addEventListener('click', (event) => {
+                const tabButton = event.target.closest('[data-tab]');
+                if (!tabButton) return;
+                event.preventDefault();
+                switchTab(tabButton.dataset.tab);
+            });
 
             on('btn-copy-share-link', 'click', copyShareLink);
             on('btn-copy-text-summary', 'click', copyTextSummary);
@@ -638,24 +650,41 @@
         }
 
         window.switchTab = function(tabName) {
-            // Toggle which section is visible FIRST, before any rendering
-            // runs, so the tab switch is visible even if a render function
-            // below throws on bad data. Nothing else can block this part.
-            ['leaderboard', 'scorecard', 'setup'].forEach(t => {
+            const validTabs = ['leaderboard', 'scorecard', 'setup'];
+            if (!validTabs.includes(tabName)) return;
+
+            validTabs.forEach(t => {
                 const tabEl = document.getElementById(`tab-${t}`);
                 const btnEl = document.getElementById(`tab-btn-${t}`);
                 if (!tabEl || !btnEl) return;
-                if (t === tabName) {
-                    tabEl.classList.remove('hidden');
+
+                const isActive = t === tabName;
+
+                // Use the native hidden property PLUS our own CSS class.
+                // This avoids relying on Tailwind's `hidden` utility.
+                tabEl.hidden = !isActive;
+                tabEl.classList.toggle('hidden', !isActive);
+                tabEl.classList.toggle('tab-panel-hidden', !isActive);
+
+                btnEl.setAttribute('aria-selected', String(isActive));
+                btnEl.setAttribute('aria-current', isActive ? 'page' : 'false');
+
+                if (isActive) {
                     btnEl.className = "flex-1 py-2 rounded-lg flex items-center justify-center gap-1 transition-all bg-gold-500 text-emerald-950 font-bold shadow-md";
                 } else {
-                    tabEl.classList.add('hidden');
                     btnEl.className = "flex-1 py-2 rounded-lg flex items-center justify-center gap-1 transition-all text-emerald-200 hover:text-white";
                 }
             });
 
+            // Keep the selected tab visible even if a render function below
+            // encounters malformed Firebase data.
             updateUI();
-            try { lucide.createIcons(); } catch (e) { console.warn('Icon render failed:', e); }
+
+            try {
+                lucide.createIcons();
+            } catch (e) {
+                console.warn('Icon render failed:', e);
+            }
         };
 
         // Each render function runs independently so a bug in one

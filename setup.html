@@ -7,6 +7,8 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,19 +41,19 @@
         <header class="bg-gradient-to-b from-emerald-900 to-emerald-950 p-4 border-b border-gold-500/30 text-center relative overflow-hidden sticky top-0 z-30 shadow-lg">
             <div class="relative z-10 flex flex-col items-center">
                 <h1 class="font-serif text-2xl font-extrabold tracking-wider gold-gradient-text">FLYNN INVITATIONAL</h1>
-                <span class="text-[10px] bg-gold-500/20 text-gold-400 px-2 py-0.5 rounded border border-gold-500/40 font-mono font-bold mt-1">TOURNAMENT SETUP</span>
+                <span id="room-code-badge" class="text-[10px] bg-gold-500/20 text-gold-400 px-2 py-0.5 rounded border border-gold-500/40 font-mono font-bold mt-1">TOURNAMENT SETUP</span>
             </div>
 
             <nav class="flex mt-3 bg-emerald-900/80 p-1 rounded-xl border border-gold-500/20 text-xs font-medium">
-                <a href="index.html" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 text-emerald-200 hover:text-white">
+                <a id="nav-leaderboard" href="index.html" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 text-emerald-200 hover:text-white">
                     <i data-lucide="trophy" class="w-3.5 h-3.5"></i>
                     <span>Leaderboard</span>
                 </a>
-                <a href="scorecard.html" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 text-emerald-200 hover:text-white">
+                <a id="nav-scorecard" href="scorecard.html" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 text-emerald-200 hover:text-white">
                     <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
                     <span>Scorecard</span>
                 </a>
-                <a href="setup.html" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 bg-gold-500 text-emerald-950 font-bold shadow-md">
+                <a id="nav-setup" href="setup.html" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 bg-gold-500 text-emerald-950 font-bold shadow-md">
                     <i data-lucide="settings" class="w-3.5 h-3.5"></i>
                     <span>Setup</span>
                 </a>
@@ -61,50 +63,223 @@
         <!-- Main Content -->
         <main class="flex-1 p-4 pb-20 space-y-4">
             
-            <div class="bg-emerald-900/40 p-4 rounded-xl border border-emerald-800 space-y-3">
-                <h2 class="font-serif font-bold text-base text-gold-400 flex items-center gap-2">
-                    <i data-lucide="wifi" class="w-4 h-4"></i> Room Session Code
-                </h2>
-                <div class="flex gap-2">
-                    <input type="text" id="input-room-code" class="flex-1 bg-emerald-950 border border-emerald-700 text-white p-2.5 rounded-lg text-xs font-mono uppercase font-bold tracking-wider outline-none focus:border-gold-500" placeholder="e.g. LAKEGEORGE26">
-                    <button id="btn-apply-room-code" class="px-4 bg-gold-500 text-emerald-950 font-bold text-xs rounded-lg">Save Code</button>
-                </div>
+            <!-- Password Gate Modal/Section -->
+            <div id="password-gate" class="bg-emerald-900/80 p-5 rounded-xl border border-gold-500/30 text-center space-y-3">
+                <i data-lucide="lock" class="w-8 h-8 text-gold-400 mx-auto"></i>
+                <h2 class="font-serif font-bold text-lg text-white">Admin Authentication</h2>
+                <p class="text-xs text-emerald-300">Enter commissioner password to access setup & roster settings.</p>
+                <input type="password" id="input-password" class="w-full bg-emerald-950 border border-emerald-700 text-white p-2.5 rounded-lg text-center text-sm font-mono outline-none focus:border-gold-500" placeholder="Password">
+                <button id="btn-unlock" class="w-full py-2.5 bg-gold-500 text-emerald-950 font-bold text-xs rounded-lg active:scale-95 transition-transform">Unlock Setup</button>
             </div>
 
-            <div class="bg-emerald-900/40 p-4 rounded-xl border border-emerald-800 space-y-3">
-                <h2 class="font-serif font-bold text-base text-gold-400 flex items-center gap-2">
-                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset Options
-                </h2>
-                <button id="btn-reset-scores" class="w-full py-2.5 bg-yellow-900/40 text-gold-300 border border-yellow-700/60 font-semibold text-xs rounded-lg">Reset All Scores to Par</button>
+            <!-- Admin Content (Hidden until unlocked) -->
+            <div id="admin-content" class="hidden space-y-4">
+                
+                <div class="bg-emerald-900/40 p-4 rounded-xl border border-emerald-800 space-y-3">
+                    <h2 class="font-serif font-bold text-base text-gold-400 flex items-center gap-2">
+                        <i data-lucide="wifi" class="w-4 h-4"></i> Room Session Code
+                    </h2>
+                    <div class="flex gap-2">
+                        <input type="text" id="input-room-code" class="flex-1 bg-emerald-950 border border-emerald-700 text-white p-2.5 rounded-lg text-xs font-mono uppercase font-bold tracking-wider outline-none focus:border-gold-500" placeholder="e.g. FLYNN26">
+                        <button id="btn-apply-room-code" class="px-4 bg-gold-500 text-emerald-950 font-bold text-xs rounded-lg">Switch Room</button>
+                    </div>
+                </div>
+
+                <div class="bg-emerald-900/40 p-4 rounded-xl border border-emerald-800 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="font-serif font-bold text-base text-gold-400 flex items-center gap-2">
+                            <i data-lucide="users" class="w-4 h-4"></i> Manage Teams & Rosters
+                        </h2>
+                        <button id="btn-add-team" class="text-xs bg-emerald-800 text-gold-300 border border-emerald-700 px-2.5 py-1 rounded-lg font-bold flex items-center gap-1">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Team
+                        </button>
+                    </div>
+
+                    <div id="teams-editor-container" class="space-y-4"></div>
+
+                    <button id="btn-save-teams" class="w-full py-3 bg-gold-500 text-emerald-950 font-bold text-xs rounded-xl shadow-lg active:scale-95 transition-transform">
+                        Save Teams & Player Roster
+                    </button>
+                </div>
+
+                <div class="bg-emerald-900/40 p-4 rounded-xl border border-emerald-800 space-y-3">
+                    <h2 class="font-serif font-bold text-base text-gold-400 flex items-center gap-2">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset Options
+                    </h2>
+                    <button id="btn-reset-scores" class="w-full py-2.5 bg-yellow-900/40 text-gold-300 border border-yellow-700/60 font-semibold text-xs rounded-lg">Reset All Scores to Par</button>
+                </div>
+
             </div>
 
         </main>
     </div>
 
     <script>
+        const DEFAULT_COURSE = [
+            { hole: 1, par: 4 }, { hole: 2, par: 5 }, { hole: 3, par: 3 }, { hole: 4, par: 4 },
+            { hole: 5, par: 4 }, { hole: 6, par: 3 }, { hole: 7, par: 4 }, { hole: 8, par: 5 },
+            { hole: 9, par: 4 }, { hole: 10, par: 4 }, { hole: 11, par: 3 }, { hole: 12, par: 5 },
+            { hole: 13, par: 4 }, { hole: 14, par: 4 }, { hole: 15, par: 3 }, { hole: 16, par: 4 },
+            { hole: 17, par: 5 }, { hole: 18, par: 4 }
+        ];
+
         const STORAGE_KEY = 'FLYNN_INVITATIONAL_2026_STATE';
-        let localState = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { roomCode: "FLYNN26" };
+        const firebaseConfig = {
+            apiKey: "AIzaSyAgrl9R0YF5XHyjzsoN5iJQQwiMpyl49Ug",
+            authDomain: "flynn-invitational.firebaseapp.com",
+            databaseURL: "https://flynn-invitational-default-rtdb.firebaseio.com",
+            projectId: "flynn-invitational",
+            storageBucket: "flynn-invitational.firebasestorage.app",
+            messagingSenderId: "394140283598",
+            appId: "1:394140283598:web:3268b04be314aeb608d69f"
+        };
+
+        let db = null, firebaseReady = false;
+        try { if (firebaseConfig.apiKey) { firebase.initializeApp(firebaseConfig); db = firebase.database(); firebaseReady = true; } } catch (e) {}
+
+        function getRoomCodeFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            return (params.get('room') || 'FLYNN26').toUpperCase();
+        }
+
+        let roomCode = getRoomCodeFromURL();
+
+        function updateNavLinks() {
+            document.getElementById('nav-leaderboard').href = `index.html?room=${roomCode}`;
+            document.getElementById('nav-scorecard').href = `scorecard.html?room=${roomCode}`;
+            document.getElementById('nav-setup').href = `setup.html?room=${roomCode}`;
+            document.getElementById('room-code-badge').textContent = `ROOM: ${roomCode}`;
+        }
+
+        function loadLocalState() {
+            try {
+                const saved = localStorage.getItem(`${STORAGE_KEY}_${roomCode}`);
+                if (saved) return JSON.parse(saved);
+            } catch (e) {}
+            return {
+                roomCode: roomCode,
+                teams: [
+                    { name: "Adirondack Aviators", players: ["Flynn (C)", "Mike", "Dave", "Chris"], holes: DEFAULT_COURSE.map(h => ({ score: h.par, playerShots: [0,0,0,0], completed: false })) },
+                    { name: "Lake George Legends", players: ["John (C)", "Alex", "Sam", "Matt"], holes: DEFAULT_COURSE.map(h => ({ score: h.par, playerShots: [0,0,0,0], completed: false })) }
+                ]
+            };
+        }
+
+        let localState = loadLocalState();
+
+        function saveState() {
+            localStorage.setItem(`${STORAGE_KEY}_${roomCode}`, JSON.stringify(localState));
+            if (firebaseReady && db) {
+                db.ref('rooms/' + roomCode).set(localState);
+            }
+        }
+
+        function renderTeamsEditor() {
+            const container = document.getElementById('teams-editor-container');
+            container.innerHTML = '';
+
+            localState.teams.forEach((team, tIdx) => {
+                const card = document.createElement('div');
+                card.className = "bg-emerald-950 p-3.5 rounded-xl border border-emerald-800 space-y-3";
+                
+                let playersHtml = (team.players || []).map((p, pIdx) => `
+                    <div class="flex items-center gap-2">
+                        <input type="text" value="${p}" data-tidx="${tIdx}" data-pidx="${pIdx}" class="player-name-input flex-1 bg-emerald-900 border border-emerald-700 text-white p-2 rounded text-xs outline-none focus:border-gold-500" placeholder="Player Name">
+                        <button onclick="removePlayer(${tIdx}, ${pIdx})" class="p-2 text-red-400 bg-red-950/40 rounded border border-red-900/50"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    </div>
+                `).join('');
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-2 border-b border-emerald-800/80 pb-2">
+                        <input type="text" value="${team.name}" data-tidx="${tIdx}" class="team-name-input font-serif font-bold text-gold-400 bg-transparent border-b border-dashed border-emerald-700 focus:border-gold-500 outline-none text-sm w-2/3" placeholder="Team Name">
+                        <button onclick="removeTeam(${tIdx})" class="text-[10px] text-red-400 bg-red-950/40 px-2 py-1 rounded border border-red-900/50">Delete Team</button>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="text-[10px] text-emerald-400 uppercase font-bold">Roster Players</div>
+                        ${playersHtml}
+                        <button onclick="addPlayer(${tIdx})" class="text-[11px] text-gold-400 font-semibold flex items-center gap-1 mt-1">
+                            <i data-lucide="user-plus" class="w-3 h-3"></i> Add Player
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        window.addPlayer = function(tIdx) {
+            localState.teams[tIdx].players.push(`Player ${localState.teams[tIdx].players.length + 1}`);
+            renderTeamsEditor();
+        };
+
+        window.removePlayer = function(tIdx, pIdx) {
+            localState.teams[tIdx].players.splice(pIdx, 1);
+            renderTeamsEditor();
+        };
+
+        window.removeTeam = function(tIdx) {
+            if (confirm("Delete this team?")) {
+                localState.teams.splice(tIdx, 1);
+                renderTeamsEditor();
+            }
+        };
 
         window.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('input-room-code').value = localState.roomCode || "FLYNN26";
+            updateNavLinks();
+            document.getElementById('input-room-code').value = roomCode;
             lucide.createIcons();
+
+            document.getElementById('btn-unlock').onclick = () => {
+                const pass = document.getElementById('input-password').value.trim();
+                if (pass === 'cflynn') {
+                    document.getElementById('password-gate').classList.add('hidden');
+                    document.getElementById('admin-content').classList.remove('hidden');
+                    renderTeamsEditor();
+                } else {
+                    alert("Incorrect password!");
+                }
+            };
+
+            document.getElementById('btn-add-team').onclick = () => {
+                localState.teams.push({
+                    name: `Team ${localState.teams.length + 1}`,
+                    players: ["Player 1", "Player 2"],
+                    holes: DEFAULT_COURSE.map(h => ({ score: h.par, playerShots: [0,0], completed: false }))
+                });
+                renderTeamsEditor();
+            };
+
+            document.getElementById('btn-save-teams').onclick = () => {
+                document.querySelectorAll('.team-name-input').forEach(input => {
+                    const tIdx = parseInt(input.dataset.tidx, 10);
+                    localState.teams[tIdx].name = input.value.trim() || `Team ${tIdx + 1}`;
+                });
+
+                document.querySelectorAll('.player-name-input').forEach(input => {
+                    const tIdx = parseInt(input.dataset.tidx, 10);
+                    const pIdx = parseInt(input.dataset.pidx, 10);
+                    localState.teams[tIdx].players[pIdx] = input.value.trim() || `Player ${pIdx + 1}`;
+                });
+
+                saveState();
+                alert("Teams and roster saved successfully!");
+            };
 
             document.getElementById('btn-apply-room-code').onclick = () => {
                 const code = document.getElementById('input-room-code').value.trim().toUpperCase();
-                localState.roomCode = code;
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(localState));
-                alert(`Room code updated to ${code}`);
+                if (code) {
+                    window.location.href = `setup.html?room=${code}`;
+                }
             };
 
             document.getElementById('btn-reset-scores').onclick = () => {
-                if (confirm("Reset all team scores to par?")) {
-                    if (localState.teams) {
-                        localState.teams.forEach(t => {
-                            t.holes.forEach(h => { h.score = 4; h.completed = false; });
-                        });
-                    }
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(localState));
-                    alert("Scores reset!");
+                if (confirm("Reset all team scores back to par?")) {
+                    localState.teams.forEach(t => {
+                        t.holes = DEFAULT_COURSE.map(h => ({ score: h.par, playerShots: Array((t.players || []).length).fill(0), completed: false }));
+                    });
+                    saveState();
+                    alert("Scores reset to par!");
                 }
             };
         });

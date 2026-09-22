@@ -42,19 +42,19 @@
         <header class="bg-gradient-to-b from-emerald-900 to-emerald-950 p-4 border-b border-gold-500/30 text-center relative overflow-hidden sticky top-0 z-30 shadow-lg">
             <div class="relative z-10 flex flex-col items-center">
                 <h1 class="font-serif text-2xl font-extrabold tracking-wider gold-gradient-text">FLYNN INVITATIONAL</h1>
-                <span id="room-code-badge" class="text-[10px] bg-gold-500/20 text-gold-400 px-2 py-0.5 rounded border border-gold-500/40 font-mono font-bold mt-1">SCORECARD</span>
+                <span id="room-code-badge" class="text-[10px] bg-gold-500/20 text-gold-400 px-2 py-0.5 rounded border border-gold-500/40 font-mono font-bold mt-1">ROOM: FLYNN26</span>
             </div>
 
             <nav class="flex mt-3 bg-emerald-900/80 p-1 rounded-xl border border-gold-500/20 text-xs font-medium">
-                <a href="index.html" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 text-emerald-200 hover:text-white">
+                <a id="nav-leaderboard" href="index.html" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 text-emerald-200 hover:text-white">
                     <i data-lucide="trophy" class="w-3.5 h-3.5"></i>
                     <span>Leaderboard</span>
                 </a>
-                <a href="scorecard.html" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 bg-gold-500 text-emerald-950 font-bold shadow-md">
+                <a id="nav-scorecard" href="scorecard.html" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 bg-gold-500 text-emerald-950 font-bold shadow-md">
                     <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
                     <span>Scorecard</span>
                 </a>
-                <a href="setup.html" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 text-emerald-200 hover:text-white">
+                <a id="nav-setup" href="setup.html" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 text-emerald-200 hover:text-white">
                     <i data-lucide="settings" class="w-3.5 h-3.5"></i>
                     <span>Setup</span>
                 </a>
@@ -71,7 +71,7 @@
                 </div>
                 <div class="text-right flex-shrink-0 pl-2">
                     <div class="text-[10px] text-emerald-400 uppercase font-bold">Total Score</div>
-                    <div id="scorecard-team-total" class="font-bold text-lg text-gold-400">E (72)</div>
+                    <div id="scorecard-team-total" class="font-bold text-lg text-gold-400">E</div>
                 </div>
             </div>
 
@@ -155,22 +155,98 @@
         let db = null, dbRef = null, firebaseReady = false;
         try { if (firebaseConfig.apiKey) { firebase.initializeApp(firebaseConfig); db = firebase.database(); firebaseReady = true; } } catch (e) {}
 
+        function getRoomCodeFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            return (params.get('room') || 'FLYNN26').toUpperCase();
+        }
+
+        const roomCode = getRoomCodeFromURL();
         let activeHoleIdx = 0;
         let activeTeamIdx = 0;
-        let localState = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
-            roomCode: "FLYNN26",
-            teams: [{ name: "Adirondack Aviators", players: ["Flynn (C)", "Mike"], holes: DEFAULT_COURSE.map(h => ({ score: h.par, playerShots: [0,0], completed: false })) }]
-        };
 
-        function saveState() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(localState));
-            if (firebaseReady && dbRef) dbRef.set(localState);
-            renderUI();
+        function updateNavLinks() {
+            document.getElementById('nav-leaderboard').href = `index.html?room=${roomCode}`;
+            document.getElementById('nav-scorecard').href = `scorecard.html?room=${roomCode}`;
+            document.getElementById('nav-setup').href = `setup.html?room=${roomCode}`;
+            document.getElementById('room-code-badge').textContent = `ROOM: ${roomCode}`;
+        }
+
+        function loadLocalState() {
+            try {
+                const saved = localStorage.getItem(`${STORAGE_KEY}_${roomCode}`);
+                if (saved) return JSON.parse(saved);
+            } catch (e) {}
+            return {
+                roomCode: roomCode,
+                teams: [
+                    { name: "Team 1", players: ["Player 1", "Player 2"], holes: DEFAULT_COURSE.map(h => ({ score: h.par, playerShots: [0,0], completed: false })) },
+                    { name: "Team 2", players: ["Player 3", "Player 4"], holes: DEFAULT_COURSE.map(h => ({ score: h.par, playerShots: [0,0], completed: false })) }
+                ]
+            };
+        }
+
+        let localState = loadLocalState();
+
+        function syncToFirebaseAndLocal() {
+            localStorage.setItem(`${STORAGE_KEY}_${roomCode}`, JSON.stringify(localState));
+            if (firebaseReady && db) {
+                db.ref('rooms/' + roomCode).set(localState);
+            }
+        }
+
+        function connectToRoom() {
+            if (!firebaseReady) return;
+            dbRef = db.ref('rooms/' + roomCode);
+            dbRef.on('value', (snapshot) => {
+                const remoteState = snapshot.val();
+                if (remoteState && Array.isArray(remoteState.teams)) {
+                    localState = remoteState;
+                    localStorage.setItem(`${STORAGE_KEY}_${roomCode}`, JSON.stringify(localState));
+                    renderUI();
+                }
+            });
+        }
+
+        function renderPills() {
+            const container = document.getElementById('hole-pills-container');
+            container.innerHTML = '';
+            const team = localState.teams[activeTeamIdx];
+
+            DEFAULT_COURSE.forEach((h, idx) => {
+                const holeData = team ? team.holes[idx] : null;
+                const isCompleted = holeData && holeData.completed;
+                const isActive = idx === activeHoleIdx;
+
+                const btn = document.createElement('button');
+                btn.className = `flex-shrink-0 w-8 h-8 rounded-lg text-xs font-bold transition-all flex items-center justify-center ${
+                    isActive 
+                        ? 'bg-gold-500 text-emerald-950 shadow-md ring-2 ring-gold-400' 
+                        : isCompleted 
+                            ? 'bg-emerald-800 text-gold-400 border border-emerald-600' 
+                            : 'bg-emerald-950 text-emerald-400 border border-emerald-850'
+                }`;
+                btn.textContent = h.hole;
+                btn.onclick = () => { activeHoleIdx = idx; renderUI(); };
+                container.appendChild(btn);
+            });
+        }
+
+        function calculateTeamTotal(team) {
+            if (!team || !team.holes) return "E";
+            const totalStrokes = team.holes.reduce((sum, h) => sum + (h.score || 0), 0);
+            const totalPar = DEFAULT_COURSE.reduce((sum, h) => sum + h.par, 0);
+            const diff = totalStrokes - totalPar;
+            return diff > 0 ? `+${diff}` : (diff === 0 ? "E" : `${diff}`);
         }
 
         function renderUI() {
             const teamSelect = document.getElementById('scorecard-team-select');
-            teamSelect.innerHTML = localState.teams.map((t, idx) => `<option value="${idx}" ${idx === activeTeamIdx ? 'selected' : ''}>${t.name}</option>`).join('');
+            if (localState.teams && localState.teams.length > 0) {
+                teamSelect.innerHTML = localState.teams.map((t, idx) => `<option value="${idx}" ${idx === activeTeamIdx ? 'selected' : ''}>${t.name}</option>`).join('');
+            } else {
+                teamSelect.innerHTML = `<option>No teams</option>`;
+                return;
+            }
 
             const team = localState.teams[activeTeamIdx];
             const currentHole = DEFAULT_COURSE[activeHoleIdx];
@@ -181,11 +257,14 @@
             document.getElementById('card-hole-par').textContent = currentHole.par;
             document.getElementById('card-hole-yards').textContent = currentHole.yards;
             document.getElementById('current-hole-score-display').textContent = holeData.score;
+            document.getElementById('scorecard-team-total').textContent = calculateTeamTotal(team);
+
+            renderPills();
 
             // Player Shots List
             const playerShotsContainer = document.getElementById('player-shots-list');
             playerShotsContainer.innerHTML = '';
-            team.players.forEach((pName, pIdx) => {
+            (team.players || []).forEach((pName, pIdx) => {
                 if (!pName) return;
                 const count = (holeData.playerShots && holeData.playerShots[pIdx]) || 0;
                 const row = document.createElement('div');
@@ -207,20 +286,29 @@
             if (!team.holes[activeHoleIdx].playerShots) team.holes[activeHoleIdx].playerShots = Array(team.players.length).fill(0);
             team.holes[activeHoleIdx].playerShots[pIdx] = Math.max(0, (team.holes[activeHoleIdx].playerShots[pIdx] || 0) + delta);
             team.holes[activeHoleIdx].completed = true;
-            saveState();
+            syncToFirebaseAndLocal();
+            renderUI();
         };
 
         window.addEventListener('DOMContentLoaded', () => {
+            updateNavLinks();
             renderUI();
+            connectToRoom();
             lucide.createIcons();
 
             document.getElementById('btn-score-minus').onclick = () => {
-                localState.teams[activeTeamIdx].holes[activeHoleIdx].score = Math.max(1, localState.teams[activeTeamIdx].holes[activeHoleIdx].score - 1);
-                saveState();
+                const team = localState.teams[activeTeamIdx];
+                team.holes[activeHoleIdx].score = Math.max(1, team.holes[activeHoleIdx].score - 1);
+                team.holes[activeHoleIdx].completed = true;
+                syncToFirebaseAndLocal();
+                renderUI();
             };
             document.getElementById('btn-score-plus').onclick = () => {
-                localState.teams[activeTeamIdx].holes[activeHoleIdx].score += 1;
-                saveState();
+                const team = localState.teams[activeTeamIdx];
+                team.holes[activeHoleIdx].score += 1;
+                team.holes[activeHoleIdx].completed = true;
+                syncToFirebaseAndLocal();
+                renderUI();
             };
             document.getElementById('scorecard-team-select').onchange = (e) => {
                 activeTeamIdx = parseInt(e.target.value, 10);

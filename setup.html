@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Setup - Flynn Invitational 2026</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: { 850: '#063826', 900: '#032519', 950: '#01170f' },
+                        gold: { 300: '#fde047', 400: '#facc15', 500: '#eab308', 600: '#ca8a04', 700: '#a16207' }
+                    },
+                    fontFamily: { serif: ['Cinzel', 'serif'], sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body { background-color: #01170f; color: #f3f4f6; font-family: 'Inter', sans-serif; }
+        .gold-gradient-text { background: linear-gradient(135deg, #fef08a 0%, #eab308 50%, #ca8a04 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <div class="max-w-md mx-auto w-full min-h-screen flex flex-col bg-emerald-950 shadow-2xl relative border-x border-emerald-900/50">
+        
+        <!-- Header & Top Navigation Bar -->
+        <header class="bg-gradient-to-b from-emerald-900 to-emerald-950 p-4 border-b border-gold-500/30 text-center relative overflow-hidden sticky top-0 z-30 shadow-lg">
+            <div class="relative z-10 flex flex-col items-center">
+                <h1 class="font-serif text-2xl font-extrabold tracking-wider gold-gradient-text">FLYNN INVITATIONAL</h1>
+                <span class="text-[10px] bg-gold-500/20 text-gold-400 px-2 py-0.5 rounded border border-gold-500/40 font-mono font-bold mt-1">TOURNAMENT SETUP</span>
+            </div>
+
+            <nav class="flex mt-3 bg-emerald-900/80 p-1 rounded-xl border border-gold-500/20 text-xs font-medium">
+                <a href="index.html" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 text-emerald-200 hover:text-white">
+                    <i data-lucide="trophy" class="w-3.5 h-3.5"></i>
+                    <span>Leaderboard</span>
+                </a>
+                <a href="scorecard.html" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 text-emerald-200 hover:text-white">
+                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                    <span>Scorecard</span>
+                </a>
+                <a href="setup.html" class="flex-1 py-2 rounded-lg flex items-center justify-center gap-1 bg-gold-500 text-emerald-950 font-bold shadow-md">
+                    <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+                    <span>Setup</span>
+                </a>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 pb-20 space-y-4">
+            
+            <div class="bg-emerald-900/40 p-4 rounded-xl border border-emerald-800 space-y-3">
+                <h2 class="font-serif font-bold text-base text-gold-400 flex items-center gap-2">
+                    <i data-lucide="wifi" class="w-4 h-4"></i> Room Session Code
+                </h2>
+                <div class="flex gap-2">
+                    <input type="text" id="input-room-code" class="flex-1 bg-emerald-950 border border-emerald-700 text-white p-2.5 rounded-lg text-xs font-mono uppercase font-bold tracking-wider outline-none focus:border-gold-500" placeholder="e.g. LAKEGEORGE26">
+                    <button id="btn-apply-room-code" class="px-4 bg-gold-500 text-emerald-950 font-bold text-xs rounded-lg">Save Code</button>
+                </div>
+            </div>
+
+            <div class="bg-emerald-900/40 p-4 rounded-xl border border-emerald-800 space-y-3">
+                <h2 class="font-serif font-bold text-base text-gold-400 flex items-center gap-2">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset Options
+                </h2>
+                <button id="btn-reset-scores" class="w-full py-2.5 bg-yellow-900/40 text-gold-300 border border-yellow-700/60 font-semibold text-xs rounded-lg">Reset All Scores to Par</button>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'FLYNN_INVITATIONAL_2026_STATE';
+        let localState = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { roomCode: "FLYNN26" };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('input-room-code').value = localState.roomCode || "FLYNN26";
+            lucide.createIcons();
+
+            document.getElementById('btn-apply-room-code').onclick = () => {
+                const code = document.getElementById('input-room-code').value.trim().toUpperCase();
+                localState.roomCode = code;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(localState));
+                alert(`Room code updated to ${code}`);
+            };
+
+            document.getElementById('btn-reset-scores').onclick = () => {
+                if (confirm("Reset all team scores to par?")) {
+                    if (localState.teams) {
+                        localState.teams.forEach(t => {
+                            t.holes.forEach(h => { h.score = 4; h.completed = false; });
+                        });
+                    }
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(localState));
+                    alert("Scores reset!");
+                }
+            };
+        });
+    </script>
+</body>
+</html>

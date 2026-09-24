@@ -71,7 +71,7 @@
         </header>
 
         <!-- Main Content -->
-        <main class="flex-1 p-4 pb-20 space-y-4">
+        <main class="flex-1 p-4 pb-20 space-y-5">
             
             <div class="bg-gradient-to-r from-emerald-900 via-emerald-850 to-emerald-900 p-3 rounded-xl border border-gold-500/30 flex items-center justify-between gap-2 shadow-md">
                 <div class="flex items-center gap-2.5">
@@ -91,35 +91,96 @@
                 </button>
             </div>
 
+            <!-- Active Course Header & Current Round Leaderboard -->
             <div class="space-y-3">
+                <div class="bg-emerald-900/80 p-3 rounded-xl border border-gold-500/30 text-center">
+                    <div class="text-[10px] uppercase font-bold text-emerald-300 tracking-widest">Active Golf Course</div>
+                    <div id="active-course-heading" class="font-serif font-black text-lg text-gold-400">Olde Kinderhook Golf Club</div>
+                </div>
+
                 <div class="flex justify-between items-center px-1">
                     <h2 class="font-serif font-bold text-base text-gold-400 flex items-center gap-1.5">
-                        <i data-lucide="trophy" class="w-4 h-4"></i> Team Leaderboard
+                        <i data-lucide="trophy" class="w-4 h-4"></i> Current Round Team Leaderboard
                     </h2>
                 </div>
 
                 <div id="leaderboard-cards-container" class="space-y-3"></div>
             </div>
 
+            <!-- Active Course Individual Shot Tracker -->
             <div class="bg-emerald-900/40 p-4 rounded-xl border border-emerald-800/80 space-y-3">
                 <h3 class="font-serif font-bold text-white text-sm flex items-center gap-2">
-                    <i data-lucide="pie-chart" class="w-4 h-4 text-gold-400"></i> Shot Contributions (MVP Tracker)
+                    <i data-lucide="pie-chart" class="w-4 h-4 text-gold-400"></i> Active Round Shot Contributions
                 </h3>
-                <p class="text-[11px] text-emerald-300/70">Number of team shots used per golfer across all scramble holes.</p>
+                <p class="text-[11px] text-emerald-300/70">Team shots used per golfer in the active round.</p>
                 <div id="individual-stats-container" class="space-y-3"></div>
+            </div>
+
+            <!-- Section Divider -->
+            <div class="relative my-6">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gold-500/40"></div></div>
+                <div class="relative flex justify-center text-xs uppercase"><span class="bg-emerald-950 px-3 text-gold-400 font-serif font-bold tracking-widest">All-Round History</span></div>
+            </div>
+
+            <!-- Multi-Round Accumulated MVP Tracker -->
+            <div class="bg-emerald-900/60 p-4 rounded-xl border-2 border-gold-500/40 space-y-3 shadow-xl">
+                <h3 class="font-serif font-bold text-gold-400 text-base flex items-center gap-2">
+                    <i data-lucide="award" class="w-5 h-5 text-gold-400"></i> Running Shot Contributions Across All Rounds
+                </h3>
+                <p class="text-[11px] text-emerald-300/80">Cumulative shots used per player across all played rounds and reshuffled team rosters.</p>
+                <div id="all-round-mvp-container" class="space-y-2 pt-1"></div>
             </div>
 
         </main>
     </div>
 
     <script>
-        const DEFAULT_COURSE = [
-            { hole: 1, par: 4 }, { hole: 2, par: 5 }, { hole: 3, par: 3 }, { hole: 4, par: 4 },
-            { hole: 5, par: 4 }, { hole: 6, par: 3 }, { hole: 7, par: 4 }, { hole: 8, par: 5 },
-            { hole: 9, par: 4 }, { hole: 10, par: 4 }, { hole: 11, par: 3 }, { hole: 12, par: 5 },
-            { hole: 13, par: 4 }, { hole: 14, par: 4 }, { hole: 15, par: 3 }, { hole: 16, par: 4 },
-            { hole: 17, par: 5 }, { hole: 18, par: 4 }
-        ];
+        const COURSE_DATABASE = {
+            kinderhook: {
+                name: "Olde Kinderhook Golf Club",
+                holes: [
+                    { hole: 1, par: 4, yards: 375 }, { hole: 2, par: 5, yards: 495 }, { hole: 3, par: 3, yards: 160 },
+                    { hole: 4, par: 4, yards: 385 }, { hole: 5, par: 4, yards: 360 }, { hole: 6, par: 3, yards: 175 },
+                    { hole: 7, par: 4, yards: 405 }, { hole: 8, par: 5, yards: 510 }, { hole: 9, par: 4, yards: 350 },
+                    { hole: 10, par: 4, yards: 390 }, { hole: 11, par: 3, yards: 155 }, { hole: 12, par: 5, yards: 520 },
+                    { hole: 13, par: 4, yards: 370 }, { hole: 14, par: 4, yards: 415 }, { hole: 15, par: 3, yards: 165 },
+                    { hole: 16, par: 4, yards: 380 }, { hole: 17, par: 5, yards: 505 }, { hole: 18, par: 4, yards: 425 }
+                ]
+            },
+            hartford: {
+                name: "Hartford Greens Country Club",
+                holes: [
+                    { hole: 1, par: 4, yards: 365 }, { hole: 2, par: 5, yards: 485 }, { hole: 3, par: 3, yards: 150 },
+                    { hole: 4, par: 4, yards: 375 }, { hole: 5, par: 4, yards: 350 }, { hole: 6, par: 3, yards: 160 },
+                    { hole: 7, par: 4, yards: 390 }, { hole: 8, par: 5, yards: 500 }, { hole: 9, par: 4, yards: 340 },
+                    { hole: 10, par: 4, yards: 380 }, { hole: 11, par: 3, yards: 145 }, { hole: 12, par: 5, yards: 510 },
+                    { hole: 13, par: 4, yards: 360 }, { hole: 14, par: 4, yards: 400 }, { hole: 15, par: 3, yards: 155 },
+                    { hole: 16, par: 4, yards: 370 }, { hole: 17, par: 5, yards: 495 }, { hole: 18, par: 4, yards: 410 }
+                ]
+            },
+            topoftheworld: {
+                name: "Top of the World Golf Resort",
+                holes: [
+                    { hole: 1, par: 4, yards: 350 }, { hole: 2, par: 4, yards: 360 }, { hole: 3, par: 3, yards: 145 },
+                    { hole: 4, par: 5, yards: 480 }, { hole: 5, par: 4, yards: 340 }, { hole: 6, par: 3, yards: 155 },
+                    { hole: 7, par: 4, yards: 375 }, { hole: 8, par: 5, yards: 490 }, { hole: 9, par: 4, yards: 330 },
+                    { hole: 10, par: 4, yards: 365 }, { hole: 11, par: 3, yards: 140 }, { hole: 12, par: 5, yards: 500 },
+                    { hole: 13, par: 4, yards: 350 }, { hole: 14, par: 4, yards: 385 }, { hole: 15, par: 3, yards: 160 },
+                    { hole: 16, par: 4, yards: 360 }, { hole: 17, par: 5, yards: 485 }, { hole: 18, par: 4, yards: 395 }
+                ]
+            },
+            saratogalake: {
+                name: "Saratoga Lake Golf Club",
+                holes: [
+                    { hole: 1, par: 4, yards: 370 }, { hole: 2, par: 5, yards: 490 }, { hole: 3, par: 3, yards: 155 },
+                    { hole: 4, par: 4, yards: 380 }, { hole: 5, par: 4, yards: 355 }, { hole: 6, par: 3, yards: 170 },
+                    { hole: 7, par: 4, yards: 400 }, { hole: 8, par: 5, yards: 505 }, { hole: 9, par: 4, yards: 345 },
+                    { hole: 10, par: 4, yards: 385 }, { hole: 11, par: 3, yards: 150 }, { hole: 12, par: 5, yards: 515 },
+                    { hole: 13, par: 4, yards: 365 }, { hole: 14, par: 4, yards: 405 }, { hole: 15, par: 3, yards: 160 },
+                    { hole: 16, par: 4, yards: 375 }, { hole: 17, par: 5, yards: 500 }, { hole: 18, par: 4, yards: 420 }
+                ]
+            }
+        };
 
         const STORAGE_KEY = 'FLYNN_INVITATIONAL_2026_STATE';
         const firebaseConfig = {
@@ -133,9 +194,7 @@
         };
 
         let db = null, dbRef = null, firebaseReady = false;
-        try {
-            if (firebaseConfig.apiKey) { firebase.initializeApp(firebaseConfig); db = firebase.database(); firebaseReady = true; }
-        } catch (e) { console.warn("Firebase init failed:", e); }
+        try { if (firebaseConfig.apiKey) { firebase.initializeApp(firebaseConfig); db = firebase.database(); firebaseReady = true; } } catch (e) {}
 
         function getRoomCodeFromURL() {
             const params = new URLSearchParams(window.location.search);
@@ -157,14 +216,27 @@
             } catch (e) {}
             return {
                 roomCode: roomCode,
-                teams: [
-                    { name: "Team 1", players: ["Player 1", "Player 2"], holes: DEFAULT_COURSE.map(h => ({ score: h.par, playerShots: [0,0], completed: false })) },
-                    { name: "Team 2", players: ["Player 3", "Player 4"], holes: DEFAULT_COURSE.map(h => ({ score: h.par, playerShots: [0,0], completed: false })) }
-                ]
+                selectedCourseKey: "kinderhook",
+                holeCount: "18",
+                nineSelection: "front",
+                trackGroupScore: true,
+                teams: [],
+                history: []
             };
         }
 
         let localState = loadLocalState();
+
+        function getActiveCourseHoles() {
+            const fullCourse = COURSE_DATABASE[localState.selectedCourseKey || 'kinderhook'].holes;
+            const count = parseInt(localState.holeCount || "18", 10);
+            if (count === 18) return fullCourse;
+            if (count === 9) {
+                return localState.nineSelection === 'back' ? fullCourse.slice(9, 18) : fullCourse.slice(0, 9);
+            }
+            if (count === 6) return fullCourse.slice(0, 6);
+            return fullCourse;
+        }
 
         function connectToRoom() {
             if (!firebaseReady) return;
@@ -181,22 +253,36 @@
         }
 
         function calculateTeamStats(team) {
-            const completedHolesCount = team.holes.filter(h => h.completed).length;
-            const totalStrokes = team.holes.reduce((sum, h) => sum + (h.score || 0), 0);
-            const totalPar = DEFAULT_COURSE.reduce((sum, h) => sum + h.par, 0);
+            const activeHoles = getActiveCourseHoles();
+            const playedHoles = (team.holes || []).filter(h => h && h.completed);
+            const completedHolesCount = playedHoles.length;
+
+            let totalStrokes = 0;
+            let totalPar = 0;
+
+            (team.holes || []).forEach((h, idx) => {
+                if (h && h.completed) {
+                    totalStrokes += (h.score || 0);
+                    totalPar += (activeHoles[idx] ? activeHoles[idx].par : 0);
+                }
+            });
+
             const diff = totalStrokes - totalPar;
             let diffFormatted = diff > 0 ? `+${diff}` : (diff === 0 ? "E" : `${diff}`);
-            const thru = completedHolesCount === 18 ? "F" : (completedHolesCount === 0 ? "NP" : `Thru ${completedHolesCount}`);
+            const thru = completedHolesCount === activeHoles.length ? "F" : (completedHolesCount === 0 ? "NP" : `Thru ${completedHolesCount}`);
             return { totalStrokes, diffFormatted, thru, diff };
         }
 
         function renderLeaderboard() {
+            const courseInfo = COURSE_DATABASE[localState.selectedCourseKey || 'kinderhook'];
+            document.getElementById('active-course-heading').textContent = `${courseInfo.name} (${localState.holeCount || 18} Holes)`;
+
             const container = document.getElementById('leaderboard-cards-container');
             if (!container) return;
             container.innerHTML = '';
 
             if (!localState.teams || localState.teams.length === 0) {
-                container.innerHTML = `<div class="text-center text-xs text-emerald-400 py-8">No teams setup yet. Go to Setup tab to add teams.</div>`;
+                container.innerHTML = `<div class="text-center text-xs text-emerald-400 py-8">No teams setup yet. Go to Setup tab to configure teams.</div>`;
                 return;
             }
 
@@ -212,8 +298,8 @@
                         <div class="flex items-center gap-2.5">
                             <span class="w-7 h-7 rounded-full ${isFirst ? 'bg-gold-500 text-emerald-950' : 'bg-emerald-800 text-emerald-200'} text-xs font-bold flex items-center justify-center">${rank + 1}</span>
                             <div>
-                                <h3 class="font-serif font-bold text-white text-sm">${t.name}</h3>
-                                <p class="text-[11px] text-emerald-400">${t.players.filter(Boolean).join(', ')}</p>
+                                <h3 class="font-serif font-bold text-white text-base">${t.name}</h3>
+                                <p class="text-[11px] text-emerald-400">${(t.players || []).filter(Boolean).join(', ')}</p>
                             </div>
                         </div>
                         <div class="text-right">
@@ -225,12 +311,18 @@
                 container.appendChild(card);
             });
 
-            // MVPs
+            // Active Round MVP Stats
             const indStatsContainer = document.getElementById('individual-stats-container');
             indStatsContainer.innerHTML = '';
+            
+            const playerAllRoundTotals = {};
+
             localState.teams.forEach(t => {
                 const playerCounts = (t.players || []).map((p, pIdx) => {
                     const shots = (t.holes || []).reduce((sum, h) => sum + ((h.playerShots && h.playerShots[pIdx]) || 0), 0);
+                    if (p) {
+                        playerAllRoundTotals[p] = (playerAllRoundTotals[p] || 0) + shots;
+                    }
                     return { name: p, count: shots };
                 }).filter(p => p.name);
 
@@ -250,6 +342,50 @@
                 `).join('');
                 block.innerHTML = `<div class="text-[11px] font-bold text-gold-400 uppercase">${t.name}</div>${rowsHtml}`;
                 indStatsContainer.appendChild(block);
+            });
+
+            // Multi-Round History Integration
+            if (Array.isArray(localState.history)) {
+                localState.history.forEach(pastRound => {
+                    if (pastRound && pastRound.playerTotals) {
+                        Object.keys(pastRound.playerTotals).forEach(pName => {
+                            playerAllRoundTotals[pName] = (playerAllRoundTotals[pName] || 0) + pastRound.playerTotals[pName];
+                        });
+                    }
+                });
+            }
+
+            // All-Time MVP Container Rendering
+            const allMvpContainer = document.getElementById('all-round-mvp-container');
+            allMvpContainer.innerHTML = '';
+
+            const sortedAllTimePlayers = Object.keys(playerAllRoundTotals)
+                .map(p => ({ name: p, totalShots: playerAllRoundTotals[p] }))
+                .sort((a, b) => b.totalShots - a.totalShots);
+
+            if (sortedAllTimePlayers.length === 0) {
+                allMvpContainer.innerHTML = `<div class="text-xs text-emerald-400 italic">No player shots logged yet.</div>`;
+                return;
+            }
+
+            const maxAllTimeShots = Math.max(1, ...sortedAllTimePlayers.map(p => p.totalShots));
+
+            sortedAllTimePlayers.forEach((p, idx) => {
+                const row = document.createElement('div');
+                row.className = "space-y-1 bg-emerald-950/80 p-2.5 rounded-lg border border-emerald-800/60";
+                row.innerHTML = `
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-white font-bold flex items-center gap-1.5">
+                            <span class="text-[10px] bg-emerald-800 text-gold-300 px-1.5 py-0.5 rounded font-mono">${idx + 1}</span>
+                            ${p.name}
+                        </span>
+                        <span class="text-gold-400 font-extrabold">${p.totalShots} Total Shots</span>
+                    </div>
+                    <div class="w-full h-2 bg-emerald-900 rounded-full overflow-hidden mt-1">
+                        <div class="h-full gold-gradient-bg rounded-full" style="width: ${Math.min(100, (p.totalShots / maxAllTimeShots) * 100)}%"></div>
+                    </div>
+                `;
+                allMvpContainer.appendChild(row);
             });
         }
 

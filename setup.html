@@ -63,21 +63,21 @@
         <!-- Main Content -->
         <main class="flex-1 p-4 pb-20 space-y-4">
             
-            <!-- Password Gate Modal/Section -->
+            <!-- Password Gate Section -->
             <div id="password-gate" class="bg-emerald-900/80 p-5 rounded-xl border border-gold-500/30 text-center space-y-3">
                 <i data-lucide="lock" class="w-8 h-8 text-gold-400 mx-auto"></i>
                 <h2 class="font-serif font-bold text-lg text-white">Admin Authentication</h2>
-                <p class="text-xs text-emerald-300">Enter commissioner password to access setup & roster settings.</p>
+                <p class="text-xs text-emerald-300">Enter commissioner password to access setup & course settings.</p>
                 <input type="password" id="input-password" class="w-full bg-emerald-950 border border-emerald-700 text-white p-2.5 rounded-lg text-center text-sm font-mono outline-none focus:border-gold-500" placeholder="Password">
                 <button id="btn-unlock" class="w-full py-2.5 bg-gold-500 text-emerald-950 font-bold text-xs rounded-lg active:scale-95 transition-transform">Unlock Setup</button>
             </div>
 
-            <!-- Admin Content (Hidden until unlocked) -->
+            <!-- Admin Content -->
             <div id="admin-content" class="hidden space-y-4">
                 
                 <div class="bg-emerald-900/40 p-4 rounded-xl border border-emerald-800 space-y-3">
                     <h2 class="font-serif font-bold text-base text-gold-400 flex items-center gap-2">
-                        <i data-lucide="wifi" class="w-4 h-4"></i> Room Session Code
+                        <i data-lucide="wifi" class="w-4 h-4"></i> Match Room Code
                     </h2>
                     <div class="flex gap-2">
                         <input type="text" id="input-room-code" class="flex-1 bg-emerald-950 border border-emerald-700 text-white p-2.5 rounded-lg text-xs font-mono uppercase font-bold tracking-wider outline-none focus:border-gold-500" placeholder="e.g. FLYNN26">
@@ -85,6 +85,59 @@
                     </div>
                 </div>
 
+                <!-- Course & Round Setup -->
+                <div class="bg-emerald-900/40 p-4 rounded-xl border border-emerald-800 space-y-3">
+                    <h2 class="font-serif font-bold text-base text-gold-400 flex items-center gap-2">
+                        <i data-lucide="map-pin" class="w-4 h-4"></i> Round & Course Setup
+                    </h2>
+                    
+                    <div>
+                        <label class="text-[10px] uppercase font-bold text-emerald-400 block mb-1">Select Golf Course</label>
+                        <select id="select-course" class="w-full bg-emerald-950 border border-emerald-700 text-white font-medium text-xs rounded-lg p-2.5 outline-none focus:border-gold-500">
+                            <option value="kinderhook">Olde Kinderhook Golf Club (Valatie, NY)</option>
+                            <option value="hartford">Hartford Greens Country Club (Fort Ann, NY)</option>
+                            <option value="topoftheworld">Top of the World Golf Resort (Lake George, NY)</option>
+                            <option value="saratogalake">Saratoga Lake Golf Club (Saratoga Springs, NY)</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[10px] uppercase font-bold text-emerald-400 block mb-1">Hole Count</label>
+                            <select id="select-hole-count" class="w-full bg-emerald-950 border border-emerald-700 text-white font-medium text-xs rounded-lg p-2.5 outline-none focus:border-gold-500">
+                                <option value="18">18 Holes</option>
+                                <option value="9">9 Holes</option>
+                                <option value="6">6 Holes</option>
+                            </select>
+                        </div>
+                        <div id="nine-selection-container">
+                            <label class="text-[10px] uppercase font-bold text-emerald-400 block mb-1">Nine Selection</label>
+                            <select id="select-nine" class="w-full bg-emerald-950 border border-emerald-700 text-white font-medium text-xs rounded-lg p-2.5 outline-none focus:border-gold-500">
+                                <option value="front">Front 9 (Holes 1-9)</option>
+                                <option value="back">Back 9 (Holes 10-18)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scoring Settings -->
+                <div class="bg-emerald-900/40 p-4 rounded-xl border border-emerald-800 space-y-3">
+                    <h2 class="font-serif font-bold text-base text-gold-400 flex items-center gap-2">
+                        <i data-lucide="sliders" class="w-4 h-4"></i> Scoring Configuration
+                    </h2>
+                    <div class="flex items-center justify-between bg-emerald-950 p-3 rounded-xl border border-emerald-800">
+                        <div>
+                            <div class="text-xs font-bold text-white">Track Group & Personal Shot Score</div>
+                            <div class="text-[10px] text-emerald-400">If OFF, team score auto-calculates from personal shots</div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggle-track-group" class="sr-only peer" checked>
+                            <div class="w-11 h-6 bg-emerald-900 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold-500"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Teams & Rosters -->
                 <div class="bg-emerald-900/40 p-4 rounded-xl border border-emerald-800 space-y-4">
                     <div class="flex justify-between items-center">
                         <h2 class="font-serif font-bold text-base text-gold-400 flex items-center gap-2">
@@ -97,16 +150,20 @@
 
                     <div id="teams-editor-container" class="space-y-4"></div>
 
-                    <button id="btn-save-teams" class="w-full py-3 bg-gold-500 text-emerald-950 font-bold text-xs rounded-xl shadow-lg active:scale-95 transition-transform">
-                        Save Teams & Player Roster
+                    <button id="btn-save-settings" class="w-full py-3 bg-gold-500 text-emerald-950 font-bold text-xs rounded-xl shadow-lg active:scale-95 transition-transform">
+                        Save Setup & Apply Round
                     </button>
                 </div>
 
+                <!-- Clear Options -->
                 <div class="bg-emerald-900/40 p-4 rounded-xl border border-emerald-800 space-y-3">
                     <h2 class="font-serif font-bold text-base text-gold-400 flex items-center gap-2">
-                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset Options
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset & Clear Options
                     </h2>
-                    <button id="btn-reset-scores" class="w-full py-2.5 bg-yellow-900/40 text-gold-300 border border-yellow-700/60 font-semibold text-xs rounded-lg">Reset All Scores to Par</button>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="btn-clear-course-scores" class="py-2.5 bg-yellow-900/40 text-gold-300 border border-yellow-700/60 font-semibold text-xs rounded-lg">Clear Active Round Scores</button>
+                        <button id="btn-clear-all-history" class="py-2.5 bg-red-950/60 text-red-300 border border-red-800/80 font-semibold text-xs rounded-lg">Clear All Round History</button>
+                    </div>
                 </div>
 
             </div>
@@ -115,13 +172,56 @@
     </div>
 
     <script>
-        const DEFAULT_COURSE = [
-            { hole: 1, par: 4 }, { hole: 2, par: 5 }, { hole: 3, par: 3 }, { hole: 4, par: 4 },
-            { hole: 5, par: 4 }, { hole: 6, par: 3 }, { hole: 7, par: 4 }, { hole: 8, par: 5 },
-            { hole: 9, par: 4 }, { hole: 10, par: 4 }, { hole: 11, par: 3 }, { hole: 12, par: 5 },
-            { hole: 13, par: 4 }, { hole: 14, par: 4 }, { hole: 15, par: 3 }, { hole: 16, par: 4 },
-            { hole: 17, par: 5 }, { hole: 18, par: 4 }
-        ];
+        const COURSE_DATABASE = {
+            kinderhook: {
+                name: "Olde Kinderhook Golf Club",
+                location: "Valatie, NY",
+                holes: [
+                    { hole: 1, par: 4, yards: 375 }, { hole: 2, par: 5, yards: 495 }, { hole: 3, par: 3, yards: 160 },
+                    { hole: 4, par: 4, yards: 385 }, { hole: 5, par: 4, yards: 360 }, { hole: 6, par: 3, yards: 175 },
+                    { hole: 7, par: 4, yards: 405 }, { hole: 8, par: 5, yards: 510 }, { hole: 9, par: 4, yards: 350 },
+                    { hole: 10, par: 4, yards: 390 }, { hole: 11, par: 3, yards: 155 }, { hole: 12, par: 5, yards: 520 },
+                    { hole: 13, par: 4, yards: 370 }, { hole: 14, par: 4, yards: 415 }, { hole: 15, par: 3, yards: 165 },
+                    { hole: 16, par: 4, yards: 380 }, { hole: 17, par: 5, yards: 505 }, { hole: 18, par: 4, yards: 425 }
+                ]
+            },
+            hartford: {
+                name: "Hartford Greens Country Club",
+                location: "Fort Ann, NY",
+                holes: [
+                    { hole: 1, par: 4, yards: 365 }, { hole: 2, par: 5, yards: 485 }, { hole: 3, par: 3, yards: 150 },
+                    { hole: 4, par: 4, yards: 375 }, { hole: 5, par: 4, yards: 350 }, { hole: 6, par: 3, yards: 160 },
+                    { hole: 7, par: 4, yards: 390 }, { hole: 8, par: 5, yards: 500 }, { hole: 9, par: 4, yards: 340 },
+                    { hole: 10, par: 4, yards: 380 }, { hole: 11, par: 3, yards: 145 }, { hole: 12, par: 5, yards: 510 },
+                    { hole: 13, par: 4, yards: 360 }, { hole: 14, par: 4, yards: 400 }, { hole: 15, par: 3, yards: 155 },
+                    { hole: 16, par: 4, yards: 370 }, { hole: 17, par: 5, yards: 495 }, { hole: 18, par: 4, yards: 410 }
+                ]
+            },
+            topoftheworld: {
+                name: "Top of the World Golf Resort",
+                location: "Lake George, NY",
+                holes: [
+                    { hole: 1, par: 4, yards: 350 }, { hole: 2, par: 4, yards: 360 }, { hole: 3, par: 3, yards: 145 },
+                    { hole: 4, par: 5, yards: 480 }, { hole: 5, par: 4, yards: 340 }, { hole: 6, par: 3, yards: 155 },
+                    { hole: 7, par: 4, yards: 375 }, { hole: 8, par: 5, yards: 490 }, { hole: 9, par: 4, yards: 330 },
+                    { hole: 10, par: 4, yards: 365 }, { hole: 11, par: 3, yards: 140 }, { hole: 12, par: 5, yards: 500 },
+                    { hole: 13, par: 4, yards: 350 }, { hole: 14, par: 4, yards: 385 }, { hole: 15, par: 3, yards: 160 },
+                    { hole: 16, par: 4, yards: 360 }, { hole: 17, par: 5, yards: 485 }, { hole: 18, par: 4, yards: 395 }
+                ]
+            },
+            saratogalake: {
+                name: "Saratoga Lake Golf Club",
+                location: "Saratoga Springs, NY",
+                holes: [
+                    { hole: 1, par: 4, yards: 370 }, { hole: 2, par: 5, yards: 490 }, { hole: 3, par: 3, yards: 155 },
+                    { hole: 4, par: 4, yards: 380 }, { hole: 5, par: 4, yards: 355 }, { hole: 6, par: 3, yards: 170 },
+                    { hole: 7, par: 4, yards: 400 }, { hole: 8, par: 5, yards: 505 }, { hole: 9, par: 4, yards: 345 },
+                    { hole: 10, par: 4, yards: 385 }, { hole: 11, par: 3, yards: 150 }, { hole: 12, par: 5, yards: 515 },
+                    { hole: 13, par: 4, yards: 365 }, { hole: 14, par: 4, yards: 405 }, { hole: 15, par: 3, yards: 160 },
+                    { hole: 16, par: 4, yards: 375 }, { hole: 17, par: 5, yards: 500 }, { hole: 18, par: 4, yards: 420 }
+                ]
+            }
+        };
 
         const STORAGE_KEY = 'FLYNN_INVITATIONAL_2026_STATE';
         const firebaseConfig = {
@@ -158,10 +258,15 @@
             } catch (e) {}
             return {
                 roomCode: roomCode,
+                selectedCourseKey: "kinderhook",
+                holeCount: "18",
+                nineSelection: "front",
+                trackGroupScore: true,
                 teams: [
-                    { name: "Adirondack Aviators", players: ["Flynn (C)", "Mike", "Dave", "Chris"], holes: DEFAULT_COURSE.map(h => ({ score: h.par, playerShots: [0,0,0,0], completed: false })) },
-                    { name: "Lake George Legends", players: ["John (C)", "Alex", "Sam", "Matt"], holes: DEFAULT_COURSE.map(h => ({ score: h.par, playerShots: [0,0,0,0], completed: false })) }
-                ]
+                    { name: "Adirondack Aviators", players: ["Connor", "Jack", "Coffey"], holes: [] },
+                    { name: "Lake George Legends", players: ["David", "Ski", "Mike"], holes: [] }
+                ],
+                history: []
             };
         }
 
@@ -172,6 +277,17 @@
             if (firebaseReady && db) {
                 db.ref('rooms/' + roomCode).set(localState);
             }
+        }
+
+        function getActiveCourseHoles() {
+            const fullCourse = COURSE_DATABASE[localState.selectedCourseKey || 'kinderhook'].holes;
+            const count = parseInt(localState.holeCount || "18", 10);
+            if (count === 18) return fullCourse;
+            if (count === 9) {
+                return localState.nineSelection === 'back' ? fullCourse.slice(9, 18) : fullCourse.slice(0, 9);
+            }
+            if (count === 6) return fullCourse.slice(0, 6);
+            return fullCourse;
         }
 
         function renderTeamsEditor() {
@@ -225,10 +341,25 @@
             }
         };
 
+        function populateForm() {
+            document.getElementById('select-course').value = localState.selectedCourseKey || 'kinderhook';
+            document.getElementById('select-hole-count').value = localState.holeCount || '18';
+            document.getElementById('select-nine').value = localState.nineSelection || 'front';
+            document.getElementById('toggle-track-group').checked = localState.trackGroupScore !== false;
+            
+            const count = document.getElementById('select-hole-count').value;
+            document.getElementById('nine-selection-container').style.display = count === '9' ? 'block' : 'none';
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             updateNavLinks();
             document.getElementById('input-room-code').value = roomCode;
+            populateForm();
             lucide.createIcons();
+
+            document.getElementById('select-hole-count').onchange = (e) => {
+                document.getElementById('nine-selection-container').style.display = e.target.value === '9' ? 'block' : 'none';
+            };
 
             document.getElementById('btn-unlock').onclick = () => {
                 const pass = document.getElementById('input-password').value.trim();
@@ -245,12 +376,17 @@
                 localState.teams.push({
                     name: `Team ${localState.teams.length + 1}`,
                     players: ["Player 1", "Player 2"],
-                    holes: DEFAULT_COURSE.map(h => ({ score: h.par, playerShots: [0,0], completed: false }))
+                    holes: []
                 });
                 renderTeamsEditor();
             };
 
-            document.getElementById('btn-save-teams').onclick = () => {
+            document.getElementById('btn-save-settings').onclick = () => {
+                localState.selectedCourseKey = document.getElementById('select-course').value;
+                localState.holeCount = document.getElementById('select-hole-count').value;
+                localState.nineSelection = document.getElementById('select-nine').value;
+                localState.trackGroupScore = document.getElementById('toggle-track-group').checked;
+
                 document.querySelectorAll('.team-name-input').forEach(input => {
                     const tIdx = parseInt(input.dataset.tidx, 10);
                     localState.teams[tIdx].name = input.value.trim() || `Team ${tIdx + 1}`;
@@ -262,8 +398,19 @@
                     localState.teams[tIdx].players[pIdx] = input.value.trim() || `Player ${pIdx + 1}`;
                 });
 
+                const activeHoles = getActiveCourseHoles();
+                localState.teams.forEach(t => {
+                    if (!t.holes || t.holes.length !== activeHoles.length) {
+                        t.holes = activeHoles.map(h => ({
+                            score: 0,
+                            playerShots: Array((t.players || []).length).fill(0),
+                            completed: false
+                        }));
+                    }
+                });
+
                 saveState();
-                alert("Teams and roster saved successfully!");
+                alert("Settings and teams saved successfully!");
             };
 
             document.getElementById('btn-apply-room-code').onclick = () => {
@@ -273,13 +420,34 @@
                 }
             };
 
-            document.getElementById('btn-reset-scores').onclick = () => {
-                if (confirm("Reset all team scores back to par?")) {
+            document.getElementById('btn-clear-course-scores').onclick = () => {
+                if (confirm("Clear scores for the active round? Unplayed holes will start at 0.")) {
+                    const activeHoles = getActiveCourseHoles();
                     localState.teams.forEach(t => {
-                        t.holes = DEFAULT_COURSE.map(h => ({ score: h.par, playerShots: Array((t.players || []).length).fill(0), completed: false }));
+                        t.holes = activeHoles.map(h => ({
+                            score: 0,
+                            playerShots: Array((t.players || []).length).fill(0),
+                            completed: false
+                        }));
                     });
                     saveState();
-                    alert("Scores reset to par!");
+                    alert("Active round scores cleared!");
+                }
+            };
+
+            document.getElementById('btn-clear-all-history').onclick = () => {
+                if (confirm("Clear active round scores AND all accumulated history across all rounds?")) {
+                    const activeHoles = getActiveCourseHoles();
+                    localState.teams.forEach(t => {
+                        t.holes = activeHoles.map(h => ({
+                            score: 0,
+                            playerShots: Array((t.players || []).length).fill(0),
+                            completed: false
+                        }));
+                    });
+                    localState.history = [];
+                    saveState();
+                    alert("All course scores and multi-round history cleared!");
                 }
             };
         });

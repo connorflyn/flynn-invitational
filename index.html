@@ -135,52 +135,18 @@
     </div>
 
     <script>
-        const COURSE_DATABASE = {
-            kinderhook: {
-                name: "Olde Kinderhook Golf Club",
-                holes: [
-                    { hole: 1, par: 4, yards: 375 }, { hole: 2, par: 5, yards: 495 }, { hole: 3, par: 3, yards: 160 },
-                    { hole: 4, par: 4, yards: 385 }, { hole: 5, par: 4, yards: 360 }, { hole: 6, par: 3, yards: 175 },
-                    { hole: 7, par: 4, yards: 405 }, { hole: 8, par: 5, yards: 510 }, { hole: 9, par: 4, yards: 350 },
-                    { hole: 10, par: 4, yards: 390 }, { hole: 11, par: 3, yards: 155 }, { hole: 12, par: 5, yards: 520 },
-                    { hole: 13, par: 4, yards: 370 }, { hole: 14, par: 4, yards: 415 }, { hole: 15, par: 3, yards: 165 },
-                    { hole: 16, par: 4, yards: 380 }, { hole: 17, par: 5, yards: 505 }, { hole: 18, par: 4, yards: 425 }
-                ]
-            },
-            hartford: {
-                name: "Hartford Greens Country Club",
-                holes: [
-                    { hole: 1, par: 4, yards: 365 }, { hole: 2, par: 5, yards: 485 }, { hole: 3, par: 3, yards: 150 },
-                    { hole: 4, par: 4, yards: 375 }, { hole: 5, par: 4, yards: 350 }, { hole: 6, par: 3, yards: 160 },
-                    { hole: 7, par: 4, yards: 390 }, { hole: 8, par: 5, yards: 500 }, { hole: 9, par: 4, yards: 340 },
-                    { hole: 10, par: 4, yards: 380 }, { hole: 11, par: 3, yards: 145 }, { hole: 12, par: 5, yards: 510 },
-                    { hole: 13, par: 4, yards: 360 }, { hole: 14, par: 4, yards: 400 }, { hole: 15, par: 3, yards: 155 },
-                    { hole: 16, par: 4, yards: 370 }, { hole: 17, par: 5, yards: 495 }, { hole: 18, par: 4, yards: 410 }
-                ]
-            },
-            topoftheworld: {
-                name: "Top of the World Golf Resort",
-                holes: [
-                    { hole: 1, par: 4, yards: 350 }, { hole: 2, par: 4, yards: 360 }, { hole: 3, par: 3, yards: 145 },
-                    { hole: 4, par: 5, yards: 480 }, { hole: 5, par: 4, yards: 340 }, { hole: 6, par: 3, yards: 155 },
-                    { hole: 7, par: 4, yards: 375 }, { hole: 8, par: 5, yards: 490 }, { hole: 9, par: 4, yards: 330 },
-                    { hole: 10, par: 4, yards: 365 }, { hole: 11, par: 3, yards: 140 }, { hole: 12, par: 5, yards: 500 },
-                    { hole: 13, par: 4, yards: 350 }, { hole: 14, par: 4, yards: 385 }, { hole: 15, par: 3, yards: 160 },
-                    { hole: 16, par: 4, yards: 360 }, { hole: 17, par: 5, yards: 485 }, { hole: 18, par: 4, yards: 395 }
-                ]
-            },
-            saratogalake: {
-                name: "Saratoga Lake Golf Club",
-                holes: [
-                    { hole: 1, par: 4, yards: 370 }, { hole: 2, par: 5, yards: 490 }, { hole: 3, par: 3, yards: 155 },
-                    { hole: 4, par: 4, yards: 380 }, { hole: 5, par: 4, yards: 355 }, { hole: 6, par: 3, yards: 170 },
-                    { hole: 7, par: 4, yards: 400 }, { hole: 8, par: 5, yards: 505 }, { hole: 9, par: 4, yards: 345 },
-                    { hole: 10, par: 4, yards: 385 }, { hole: 11, par: 3, yards: 150 }, { hole: 12, par: 5, yards: 515 },
-                    { hole: 13, par: 4, yards: 365 }, { hole: 14, par: 4, yards: 405 }, { hole: 15, par: 3, yards: 160 },
-                    { hole: 16, par: 4, yards: 375 }, { hole: 17, par: 5, yards: 500 }, { hole: 18, par: 4, yards: 420 }
-                ]
+        let coursesJsonData = [];
+
+        async function fetchCoursesJson() {
+            try {
+                const res = await fetch('courses.json');
+                if (res.ok) {
+                    coursesJsonData = await res.json();
+                }
+            } catch (e) {
+                console.error("Failed to load courses.json", e);
             }
-        };
+        }
 
         const STORAGE_KEY = 'FLYNN_INVITATIONAL_2026_STATE';
         const firebaseConfig = {
@@ -216,7 +182,8 @@
             } catch (e) {}
             return {
                 roomCode: roomCode,
-                selectedCourseKey: "kinderhook",
+                selectedCourseKey: "olde-kinderhook",
+                selectedTee: "Middle",
                 customCourseName: "",
                 holeCount: "18",
                 nineSelection: "front",
@@ -238,12 +205,22 @@
         }
 
         function getActiveCourseHoles() {
-            let fullCourse;
-            if (localState.selectedCourseKey === 'custom') {
+            let fullCourse = [];
+            const courseId = localState.selectedCourseKey || 'olde-kinderhook';
+            const matchedCourse = coursesJsonData.find(c => c.id === courseId);
+
+            if (localState.selectedCourseKey === 'custom' || !matchedCourse) {
                 fullCourse = generateCustomCourseHoles(18);
             } else {
-                fullCourse = COURSE_DATABASE[localState.selectedCourseKey || 'kinderhook'].holes;
+                const teeName = localState.selectedTee || Object.keys(matchedCourse.tees)[0];
+                const teeData = matchedCourse.tees[teeName] || Object.values(matchedCourse.tees)[0];
+                fullCourse = matchedCourse.holes.map((h, i) => ({
+                    hole: h.hole,
+                    par: h.par,
+                    yards: teeData && teeData.yardage ? teeData.yardage[i] : 350
+                }));
             }
+
             const count = parseInt(localState.holeCount || "18", 10);
             if (count === 18) return fullCourse;
             if (count === 9) {
@@ -289,9 +266,11 @@
         }
 
         function renderLeaderboard() {
+            const courseId = localState.selectedCourseKey || 'olde-kinderhook';
+            const matchedCourse = coursesJsonData.find(c => c.id === courseId);
             const courseName = localState.selectedCourseKey === 'custom' 
                 ? (localState.customCourseName || "Custom Course") 
-                : COURSE_DATABASE[localState.selectedCourseKey || 'kinderhook'].name;
+                : (matchedCourse ? matchedCourse.name : "Golf Course");
 
             document.getElementById('active-course-heading').textContent = `${courseName} (${localState.holeCount || 18} Holes)`;
 
@@ -407,8 +386,9 @@
             });
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
             updateNavLinks();
+            await fetchCoursesJson();
             document.getElementById('display-room-code').textContent = roomCode;
             renderLeaderboard();
             connectToRoom();

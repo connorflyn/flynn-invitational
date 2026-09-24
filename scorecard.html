@@ -3,30 +3,310 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bachelor Golf Tournament - Scorecard</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>Bachelor Golf - Live Scorecard</title>
+  <style>
+    :root {
+      --bg-dark: #04120c;
+      --card-bg: #0b2219;
+      --gold: #e2c044;
+      --gold-dim: rgba(226, 192, 68, 0.2);
+      --text-light: #f1f1f1;
+    }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 16px;
+    }
+    nav {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    nav a {
+      color: var(--gold);
+      text-decoration: none;
+      padding: 8px 16px;
+      border: 1px solid var(--gold-dim);
+      border-radius: 6px;
+      font-weight: bold;
+      background: var(--card-bg);
+    }
+    .entry-card {
+      background: var(--card-bg);
+      border: 1px solid var(--gold-dim);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      color: var(--gold);
+      margin-bottom: 4px;
+      font-weight: bold;
+    }
+    select, input, button {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid var(--gold-dim);
+      background: #061610;
+      color: #fff;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    button {
+      background: var(--gold);
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    /* Scorecard Table Formatting */
+    .scorecard-container {
+      overflow-x: auto;
+      margin-top: 15px;
+      border: 1px solid var(--gold-dim);
+      border-radius: 8px;
+      background-color: var(--card-bg);
+    }
+    .scorecard-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+    }
+    .scorecard-table th, .scorecard-table td {
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      min-width: 45px;
+    }
+    .scorecard-table th.sticky-col, .scorecard-table td.sticky-col {
+      position: sticky;
+      left: 0;
+      background-color: #0d281e;
+      z-index: 2;
+      text-align: left;
+      min-width: 130px;
+      font-weight: bold;
+    }
+    .scorecard-table th {
+      background-color: #061610;
+      color: var(--gold);
+    }
+    .scorecard-table .tot-col {
+      background-color: #081d14;
+      font-weight: bold;
+      color: var(--gold);
+      border-left: 2px solid var(--gold-dim);
+    }
+    .score-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      font-weight: bold;
+      margin: 0 auto;
+    }
+    .score-eagle { border: 2px double var(--gold); border-radius: 50%; color: var(--gold); }
+    .score-birdie { border: 1.5px solid var(--gold); border-radius: 50%; color: var(--gold); }
+    .score-par { color: #ffffff; }
+    .score-bogey { border: 1.5px solid #e74c3c; border-radius: 2px; color: #ffffff; }
+    .score-double { border: 2px double #e74c3c; border-radius: 2px; color: #ffffff; }
+  </style>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // Embedded 4 Course Dataset
+    const COURSES = [
+      {
+        id: "olde-kinderhook",
+        name: "Olde Kinderhook Golf Club",
+        par: 72,
+        holes: [
+          { hole: 1, par: 4 }, { hole: 2, par: 4 }, { hole: 3, par: 5 }, { hole: 4, par: 3 },
+          { hole: 5, par: 4 }, { hole: 6, par: 5 }, { hole: 7, par: 3 }, { hole: 8, par: 4 },
+          { hole: 9, par: 4 }, { hole: 10, par: 4 }, { hole: 11, par: 3 }, { hole: 12, par: 4 },
+          { hole: 13, par: 5 }, { hole: 14, par: 4 }, { hole: 15, par: 4 }, { hole: 16, par: 3 },
+          { hole: 17, par: 5 }, { hole: 18, par: 4 }
+        ]
+      },
+      {
+        id: "top-of-the-world",
+        name: "Top of the World Golf Resort",
+        par: 71,
+        holes: [
+          { hole: 1, par: 4 }, { hole: 2, par: 5 }, { hole: 3, par: 5 }, { hole: 4, par: 4 },
+          { hole: 5, par: 3 }, { hole: 6, par: 4 }, { hole: 7, par: 3 }, { hole: 8, par: 4 },
+          { hole: 9, par: 4 }, { hole: 10, par: 3 }, { hole: 11, par: 4 }, { hole: 12, par: 5 },
+          { hole: 13, par: 3 }, { hole: 14, par: 5 }, { hole: 15, par: 4 }, { hole: 16, par: 4 },
+          { hole: 17, par: 4 }, { hole: 18, par: 3 }
+        ]
+      },
+      {
+        id: "hartford-greens",
+        name: "Hartford Greens Country Club",
+        par: 72,
+        holes: [
+          { hole: 1, par: 5 }, { hole: 2, par: 4 }, { hole: 3, par: 3 }, { hole: 4, par: 4 },
+          { hole: 5, par: 3 }, { hole: 6, par: 4 }, { hole: 7, par: 3 }, { hole: 8, par: 5 },
+          { hole: 9, par: 4 }, { hole: 10, par: 5 }, { hole: 11, par: 4 }, { hole: 12, par: 3 },
+          { hole: 13, par: 4 }, { hole: 14, par: 5 }, { hole: 15, par: 3 }, { hole: 16, par: 4 },
+          { hole: 17, par: 4 }, { hole: 18, par: 5 }
+        ]
+      },
+      {
+        id: "saratoga-lake",
+        name: "Saratoga Lake Golf Club",
+        par: 72,
+        holes: [
+          { hole: 1, par: 4 }, { hole: 2, par: 5 }, { hole: 3, par: 3 }, { hole: 4, par: 4 },
+          { hole: 5, par: 3 }, { hole: 6, par: 4 }, { hole: 7, par: 5 }, { hole: 8, par: 4 },
+          { hole: 9, par: 4 }, { hole: 10, par: 4 }, { hole: 11, par: 4 }, { hole: 12, par: 4 },
+          { hole: 13, par: 4 }, { hole: 14, par: 3 }, { hole: 15, par: 5 }, { hole: 16, par: 4 },
+          { hole: 17, par: 3 }, { hole: 18, par: 5 }
+        ]
+      }
+    ];
+
+    const firebaseConfig = {
+      databaseURL: "YOUR_FIREBASE_DATABASE_URL"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let activeCourse = COURSES[0];
+    let currentScores = {};
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const courseSelect = document.getElementById('course-select');
+      COURSES.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.name;
+        courseSelect.appendChild(opt);
+      });
+
+      courseSelect.addEventListener('change', (e) => {
+        activeCourse = COURSES.find(c => c.id === e.target.value);
+        listenToCourseScores();
+      });
+
+      document.getElementById('score-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const teamName = document.getElementById('team-input').value;
+        const holeNum = document.getElementById('hole-input').value;
+        const scoreVal = document.getElementById('score-input').value;
+
+        if(!teamName || !holeNum || !scoreVal) return;
+
+        const scoreRef = ref(db, `scores/${activeCourse.id}/teams/${teamName}/shots/${holeNum}`);
+        set(scoreRef, Number(scoreVal));
+      });
+
+      listenToCourseScores();
+    });
+
+    function listenToCourseScores() {
+      const courseScoresRef = ref(db, `scores/${activeCourse.id}/teams`);
+      onValue(courseScoresRef, (snapshot) => {
+        currentScores = snapshot.val() || {};
+        renderGrid();
+      });
+    }
+
+    function renderGrid() {
+      const container = document.getElementById('scorecard-grid');
+      if(!container) return;
+
+      let html = `
+        <div class="scorecard-container">
+          <table class="scorecard-table">
+            <thead>
+              <tr>
+                <th class="sticky-col">HOLE</th>
+      `;
+
+      activeCourse.holes.forEach(h => { html += `<th>${h.hole}</th>`; });
+      html += `<th class="tot-col">TOT</th></tr><tr><td class="sticky-col">Par</td>`;
+      activeCourse.holes.forEach(h => { html += `<td>${h.par}</td>`; });
+      html += `<td class="tot-col">${activeCourse.par}</td></tr></thead><tbody>`;
+
+      const teamKeys = Object.keys(currentScores);
+      if(teamKeys.length === 0) {
+        html += `<tr><td colspan="20" style="padding:20px;">No scores logged for this course yet. Enter a score above!</td></tr>`;
+      } else {
+        teamKeys.forEach(tName => {
+          let teamTotal = 0;
+          const shots = currentScores[tName].shots || {};
+          html += `<tr><td class="sticky-col">${tName}</td>`;
+
+          activeCourse.holes.forEach(h => {
+            const score = shots[h.hole];
+            if(score) {
+              teamTotal += Number(score);
+              const diff = score - h.par;
+              let badge = 'score-par';
+              if (diff <= -2) badge = 'score-eagle';
+              else if (diff === -1) badge = 'score-birdie';
+              else if (diff === 1) badge = 'score-bogey';
+              else if (diff >= 2) badge = 'score-double';
+
+              html += `<td><span class="score-badge ${badge}">${score}</span></td>`;
+            } else {
+              html += `<td>-</td>`;
+            }
+          });
+          html += `<td class="tot-col">${teamTotal || '-'}</td></tr>`;
+        });
+      }
+
+      html += `</tbody></table></div>`;
+      container.innerHTML = html;
+    }
+  </script>
 </head>
 <body>
+  <nav>
+    <a href="index.html">Leaderboard</a>
+    <a href="scorecard.html">Scorecard & Entry</a>
+    <a href="setup.html">Setup</a>
+  </nav>
 
-  <h1>Scorecard View</h1>
+  <h1>Live Scorecard & Shot Entry</h1>
+
+  <!-- Enter Score Controls -->
+  <div class="entry-card">
+    <form id="score-form">
+      <div class="form-group">
+        <label for="course-select">Course</label>
+        <select id="course-select"></select>
+      </div>
+      <div class="form-group">
+        <label for="team-input">Team Name</label>
+        <input type="text" id="team-input" placeholder="e.g. Team 1" required>
+      </div>
+      <div class="form-group">
+        <label for="hole-input">Hole Number (1-18)</label>
+        <input type="number" id="hole-input" min="1" max="18" required>
+      </div>
+      <div class="form-group">
+        <label for="score-input">Shots Taken</label>
+        <input type="number" id="score-input" min="1" max="15" required>
+      </div>
+      <button type="submit">Submit Score</button>
+    </form>
+  </div>
+
+  <!-- Live Grid View -->
   <div id="scorecard-grid"></div>
-
-  <script src="scorecard.js"></script>
-  <script>
-    // Example loading script connecting courses.json with render function
-    fetch('courses.json')
-      .then(res => res.json())
-      .then(courses => {
-        const activeCourse = courses[0]; // Loads Olde Kinderhook by default
-        
-        // Demo team data structure
-        const demoTeams = [
-          { name: "Team 1", scores: { 1: 4, 2: 4, 3: 5, 4: 3 } },
-          { name: "Team 2", scores: { 1: 5, 2: 3, 3: 4, 4: 4 } }
-        ];
-
-        renderScorecardGrid(activeCourse, demoTeams);
-      });
-  </script>
 </body>
 </html>

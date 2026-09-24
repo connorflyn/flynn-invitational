@@ -1,0 +1,180 @@
+[
+  {
+    "id": "olde-kinderhook",
+    "name": "Olde Kinderhook Golf Club",
+    "par": 72,
+    "tees": {
+      "Champion": {
+        "rating": "76.4",
+        "slope": "148",
+        "yardage": [400, 458, 602, 200, 365, 540, 170, 440, 462, 427, 237, 405, 560, 493, 380, 180, 517, 456]
+      },
+      "Back": {
+        "rating": "74.6",
+        "slope": "144",
+        "yardage": [380, 400, 574, 188, 352, 527, 166, 416, 449, 423, 224, 398, 542, 462, 365, 171, 512, 453]
+      },
+      "Middle": {
+        "rating": "73.0",
+        "slope": "143",
+        "yardage": [369, 374, 539, 177, 340, 523, 150, 388, 439, 404, 208, 377, 533, 431, 343, 155, 489, 433]
+      },
+      "Member": {
+        "rating": "69.8",
+        "slope": "138",
+        "yardage": [316, 341, 501, 160, 325, 502, 120, 357, 392, 375, 176, 351, 484, 403, 317, 130, 463, 413]
+      },
+      "Forward": {
+        "rating": "68.0",
+        "slope": "130",
+        "yardage": [280, 309, 466, 131, 261, 420, 110, 318, 353, 367, 156, 272, 426, 310, 271, 100, 405, 349]
+      }
+    },
+    "holes": [
+      { "hole": 1, "par": 4, "handicap": 5 },
+      { "hole": 2, "par": 4, "handicap": 1 },
+      { "hole": 3, "par": 5, "handicap": 7 },
+      { "hole": 4, "par": 3, "handicap": 11 },
+      { "hole": 5, "par": 4, "handicap": 13 },
+      { "hole": 6, "par": 5, "handicap": 9 },
+      { "hole": 7, "par": 3, "handicap": 17 },
+      { "hole": 8, "par": 4, "handicap": 3 },
+      { "hole": 9, "par": 4, "handicap": 15 },
+      { "hole": 10, "par": 4, "handicap": 12 },
+      { "hole": 11, "par": 3, "handicap": 18 },
+      { "hole": 12, "par": 4, "handicap": 16 },
+      { "hole": 13, "par": 5, "handicap": 2 },
+      { "hole": 14, "par": 4, "handicap": 4 },
+      { "hole": 15, "par": 4, "handicap": 10 },
+      { "hole": 16, "par": 3, "handicap": 8 },
+      { "hole": 17, "par": 5, "handicap": 14 },
+      { "hole": 18, "par": 4, "handicap": 6 }
+    ]
+  },
+  {
+    "id": "top-of-the-world",
+    "name": "Top of the World Golf Resort",
+    "par": 71,
+    "tees": {
+      "Blue": {
+        "rating": "68.3",
+        "slope": "119",
+        "yardage": [340, 515, 545, 360, 167, 288, 149, 355, 276, 170, 354, 435, 158, 414, 305, 345, 383, 202]
+      },
+      "White": {
+        "rating": "66.3",
+        "slope": "111",
+        "yardage": [325, 503, 475, 340, 147, 278, 140, 300, 265, 150, 340, 404, 129, 390, 295, 280, 370, 180]
+      }
+    },
+    "holes": [
+      { "hole": 1, "par": 4, "handicap": 11 },
+      { "hole": 2, "par": 5, "handicap": 3 },
+      { "hole": 3, "par": 5, "handicap": 1 },
+      { "hole": 4, "par": 4, "handicap": 5 },
+      { "hole": 5, "par": 3, "handicap": 15 },
+      { "hole": 6, "par": 4, "handicap": 9 },
+      { "hole": 7, "par": 3, "handicap": 17 },
+      { "hole": 8, "par": 4, "handicap": 7 },
+      { "hole": 9, "par": 4, "handicap": 13 },
+      { "hole": 10, "par": 3, "handicap": 16 },
+      { "hole": 11, "par": 4, "handicap": 10 },
+      { "hole": 12, "par": 5, "handicap": 4 },
+      { "hole": 13, "par": 3, "handicap": 18 },
+      { "hole": 14, "par": 5, "handicap": 2 },
+      { "hole": 15, "par": 4, "handicap": 12 },
+      { "hole": 16, "par": 4, "handicap": 8 },
+      { "hole": 17, "par": 4, "handicap": 6 },
+      { "hole": 18, "par": 3, "handicap": 14 }
+    ]
+  },
+  {
+    "id": "hartford-greens",
+    "name": "Hartford Greens Country Club",
+    "par": 72,
+    "tees": {
+      "Blue": {
+        "rating": "70.7",
+        "slope": "123",
+        "yardage": [486, 476, 180, 355, 152, 426, 154, 461, 363, 510, 418, 211, 413, 492, 174, 376, 408, 530]
+      },
+      "White": {
+        "rating": "67.2",
+        "slope": "117",
+        "yardage": [449, 426, 165, 332, 144, 362, 128, 406, 343, 473, 363, 150, 376, 492, 140, 321, 365, 485]
+      },
+      "Gold": {
+        "rating": "61.8",
+        "slope": "102",
+        "yardage": [326, 331, 150, 226, 134, 288, 87, 342, 265, 389, 320, 109, 302, 342, 105, 201, 287, 400]
+      }
+    },
+    "holes": [
+      { "hole": 1, "par": 5, "handicap": 10 },
+      { "hole": 2, "par": 4, "handicap": 1 },
+      { "hole": 3, "par": 3, "handicap": 8 },
+      { "hole": 4, "par": 4, "handicap": 15 },
+      { "hole": 5, "par": 3, "handicap": 18 },
+      { "hole": 6, "par": 4, "handicap": 5 },
+      { "hole": 7, "par": 3, "handicap": 16 },
+      { "hole": 8, "par": 5, "handicap": 11 },
+      { "hole": 9, "par": 4, "handicap": 6 },
+      { "hole": 10, "par": 5, "handicap": 12 },
+      { "hole": 11, "par": 4, "handicap": 17 },
+      { "hole": 12, "par": 3, "handicap": 9 },
+      { "hole": 13, "par": 4, "handicap": 2 },
+      { "hole": 14, "par": 5, "handicap": 7 },
+      { "hole": 15, "par": 3, "handicap": 3 },
+      { "hole": 16, "par": 4, "handicap": 13 },
+      { "hole": 17, "par": 4, "handicap": 4 },
+      { "hole": 18, "par": 5, "handicap": 14 }
+    ]
+  },
+  {
+    "id": "saratoga-lake",
+    "name": "Saratoga Lake Golf Club",
+    "par": 72,
+    "tees": {
+      "Black": {
+        "rating": "71.3",
+        "slope": "137",
+        "yardage": [358, 574, 144, 335, 160, 310, 488, 320, 324, 342, 329, 455, 426, 173, 500, 410, 158, 460]
+      },
+      "White": {
+        "rating": "69.5",
+        "slope": "130",
+        "yardage": [340, 530, 135, 315, 153, 305, 463, 280, 295, 302, 307, 415, 407, 147, 469, 369, 144, 432]
+      },
+      "Gold": {
+        "rating": "66.0",
+        "slope": "121",
+        "yardage": [320, 487, 128, 300, 111, 292, 411, 263, 250, 264, 263, 371, 356, 118, 426, 319, 108, 337]
+      },
+      "Red": {
+        "rating": "64.1",
+        "slope": "112",
+        "yardage": [310, 444, 111, 287, 94, 270, 326, 173, 250, 251, 254, 299, 282, 115, 358, 308, 107, 252]
+      }
+    },
+    "holes": [
+      { "hole": 1, "par": 4, "handicap": 3 },
+      { "hole": 2, "par": 5, "handicap": 7 },
+      { "hole": 3, "par": 3, "handicap": 17 },
+      { "hole": 4, "par": 4, "handicap": 5 },
+      { "hole": 5, "par": 3, "handicap": 11 },
+      { "hole": 6, "par": 4, "handicap": 15 },
+      { "hole": 7, "par": 5, "handicap": 1 },
+      { "hole": 8, "par": 4, "handicap": 13 },
+      { "hole": 9, "par": 4, "handicap": 9 },
+      { "hole": 10, "par": 4, "handicap": 18 },
+      { "hole": 11, "par": 4, "handicap": 12 },
+      { "hole": 12, "par": 4, "handicap": 4 },
+      { "hole": 13, "par": 4, "handicap": 2 },
+      { "hole": 14, "par": 3, "handicap": 16 },
+      { "hole": 15, "par": 5, "handicap": 14 },
+      { "hole": 16, "par": 4, "handicap": 6 },
+      { "hole": 17, "par": 3, "handicap": 10 },
+      { "hole": 18, "par": 5, "handicap": 8 }
+    ]
+  }
+]

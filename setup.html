@@ -93,12 +93,13 @@
                     
                     <div>
                         <label class="text-[10px] uppercase font-bold text-emerald-400 block mb-1">Select Golf Course</label>
-                        <select id="select-course" class="w-full bg-emerald-950 border border-emerald-700 text-white font-medium text-xs rounded-lg p-2.5 outline-none focus:border-gold-500"></select>
-                    </div>
-
-                    <div id="tee-selection-container">
-                        <label class="text-[10px] uppercase font-bold text-emerald-400 block mb-1">Tee Box</label>
-                        <select id="select-tee" class="w-full bg-emerald-950 border border-emerald-700 text-white font-medium text-xs rounded-lg p-2.5 outline-none focus:border-gold-500"></select>
+                        <select id="select-course" class="w-full bg-emerald-950 border border-emerald-700 text-white font-medium text-xs rounded-lg p-2.5 outline-none focus:border-gold-500">
+                            <option value="kinderhook">Olde Kinderhook Golf Club (Valatie, NY)</option>
+                            <option value="hartford">Hartford Greens Country Club (Fort Ann, NY)</option>
+                            <option value="topoftheworld">Top of the World Golf Resort (Lake George, NY)</option>
+                            <option value="saratogalake">Saratoga Lake Golf Club (Saratoga Springs, NY)</option>
+                            <option value="custom">-- Custom / Random Course --</option>
+                        </select>
                     </div>
 
                     <div id="custom-course-container" class="hidden">
@@ -189,18 +190,56 @@
     </div>
 
     <script>
-        let coursesJsonData = [];
-
-        async function fetchCoursesJson() {
-            try {
-                const res = await fetch('courses.json');
-                if (res.ok) {
-                    coursesJsonData = await res.json();
-                }
-            } catch (e) {
-                console.error("Failed to load courses.json", e);
+        const COURSE_DATABASE = {
+            kinderhook: {
+                name: "Olde Kinderhook Golf Club",
+                location: "Valatie, NY",
+                holes: [
+                    { hole: 1, par: 4, yards: 375 }, { hole: 2, par: 5, yards: 495 }, { hole: 3, par: 3, yards: 160 },
+                    { hole: 4, par: 4, yards: 385 }, { hole: 5, par: 4, yards: 360 }, { hole: 6, par: 3, yards: 175 },
+                    { hole: 7, par: 4, yards: 405 }, { hole: 8, par: 5, yards: 510 }, { hole: 9, par: 4, yards: 350 },
+                    { hole: 10, par: 4, yards: 390 }, { hole: 11, par: 3, yards: 155 }, { hole: 12, par: 5, yards: 520 },
+                    { hole: 13, par: 4, yards: 370 }, { hole: 14, par: 4, yards: 415 }, { hole: 15, par: 3, yards: 165 },
+                    { hole: 16, par: 4, yards: 380 }, { hole: 17, par: 5, yards: 505 }, { hole: 18, par: 4, yards: 425 }
+                ]
+            },
+            hartford: {
+                name: "Hartford Greens Country Club",
+                location: "Fort Ann, NY",
+                holes: [
+                    { hole: 1, par: 4, yards: 365 }, { hole: 2, par: 5, yards: 485 }, { hole: 3, par: 3, yards: 150 },
+                    { hole: 4, par: 4, yards: 375 }, { hole: 5, par: 4, yards: 350 }, { hole: 6, par: 3, yards: 160 },
+                    { hole: 7, par: 4, yards: 390 }, { hole: 8, par: 5, yards: 500 }, { hole: 9, par: 4, yards: 340 },
+                    { hole: 10, par: 4, yards: 380 }, { hole: 11, par: 3, yards: 145 }, { hole: 12, par: 5, yards: 510 },
+                    { hole: 13, par: 4, yards: 360 }, { hole: 14, par: 4, yards: 400 }, { hole: 15, par: 3, yards: 155 },
+                    { hole: 16, par: 4, yards: 370 }, { hole: 17, par: 5, yards: 495 }, { hole: 18, par: 4, yards: 410 }
+                ]
+            },
+            topoftheworld: {
+                name: "Top of the World Golf Resort",
+                location: "Lake George, NY",
+                holes: [
+                    { hole: 1, par: 4, yards: 350 }, { hole: 2, par: 4, yards: 360 }, { hole: 3, par: 3, yards: 145 },
+                    { hole: 4, par: 5, yards: 480 }, { hole: 5, par: 4, yards: 340 }, { hole: 6, par: 3, yards: 155 },
+                    { hole: 7, par: 4, yards: 375 }, { hole: 8, par: 5, yards: 490 }, { hole: 9, par: 4, yards: 330 },
+                    { hole: 10, par: 4, yards: 365 }, { hole: 11, par: 3, yards: 140 }, { hole: 12, par: 5, yards: 500 },
+                    { hole: 13, par: 4, yards: 350 }, { hole: 14, par: 4, yards: 385 }, { hole: 15, par: 3, yards: 160 },
+                    { hole: 16, par: 4, yards: 360 }, { hole: 17, par: 5, yards: 485 }, { hole: 18, par: 4, yards: 395 }
+                ]
+            },
+            saratogalake: {
+                name: "Saratoga Lake Golf Club",
+                location: "Saratoga Springs, NY",
+                holes: [
+                    { hole: 1, par: 4, yards: 370 }, { hole: 2, par: 5, yards: 490 }, { hole: 3, par: 3, yards: 155 },
+                    { hole: 4, par: 4, yards: 380 }, { hole: 5, par: 4, yards: 355 }, { hole: 6, par: 3, yards: 170 },
+                    { hole: 7, par: 4, yards: 400 }, { hole: 8, par: 5, yards: 505 }, { hole: 9, par: 4, yards: 345 },
+                    { hole: 10, par: 4, yards: 385 }, { hole: 11, par: 3, yards: 150 }, { hole: 12, par: 5, yards: 515 },
+                    { hole: 13, par: 4, yards: 365 }, { hole: 14, par: 4, yards: 405 }, { hole: 15, par: 3, yards: 160 },
+                    { hole: 16, par: 4, yards: 375 }, { hole: 17, par: 5, yards: 500 }, { hole: 18, par: 4, yards: 420 }
+                ]
             }
-        }
+        };
 
         const STORAGE_KEY = 'FLYNN_INVITATIONAL_2026_STATE';
         const firebaseConfig = {
@@ -213,7 +252,7 @@
             appId: "1:394140283598:web:3268b04be314aeb608d69f"
         };
 
-        let db = null, dbRef = null, firebaseReady = false;
+        let db = null, firebaseReady = false;
         try { if (firebaseConfig.apiKey) { firebase.initializeApp(firebaseConfig); db = firebase.database(); firebaseReady = true; } } catch (e) {}
 
         function getRoomCodeFromURL() {
@@ -227,6 +266,7 @@
             document.getElementById('nav-leaderboard').href = `index.html?room=${roomCode}`;
             document.getElementById('nav-scorecard').href = `scorecard.html?room=${roomCode}`;
             document.getElementById('nav-setup').href = `setup.html?room=${roomCode}`;
+            document.getElementById('room-code-badge').textContent = `ROOM: ${roomCode}`;
         }
 
         function loadLocalState() {
@@ -236,189 +276,248 @@
             } catch (e) {}
             return {
                 roomCode: roomCode,
-                selectedCourseKey: "olde-kinderhook",
-                selectedTee: "Middle",
+                selectedCourseKey: "kinderhook",
                 customCourseName: "",
                 holeCount: "18",
                 nineSelection: "front",
                 trackGroupScore: true,
                 trackPersonalShots: true,
                 teams: [
-                    { name: "Team 1", players: ["Player 1", "Player 2"], holes: [] },
-                    { name: "Team 2", players: ["Player 3", "Player 4"], holes: [] }
-                ]
+                    { name: "Adirondack Aviators", players: ["Connor", "Jack", "Coffey"], holes: [] },
+                    { name: "Lake George Legends", players: ["David", "Ski", "Mike"], holes: [] }
+                ],
+                history: []
             };
         }
 
         let localState = loadLocalState();
 
-        function syncToFirebaseAndLocal() {
+        function saveState() {
             localStorage.setItem(`${STORAGE_KEY}_${roomCode}`, JSON.stringify(localState));
             if (firebaseReady && db) {
                 db.ref('rooms/' + roomCode).set(localState);
             }
         }
 
-        function populateCourseOptions() {
-            const selectCourse = document.getElementById('select-course');
-            selectCourse.innerHTML = '';
-
-            coursesJsonData.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c.id;
-                opt.textContent = `${c.name} (Par ${c.par})`;
-                selectCourse.appendChild(opt);
-            });
-
-            const customOpt = document.createElement('option');
-            customOpt.value = "custom";
-            customOpt.textContent = "-- Custom / Random Course --";
-            selectCourse.appendChild(customOpt);
-
-            selectCourse.value = localState.selectedCourseKey || (coursesJsonData[0] ? coursesJsonData[0].id : 'custom');
-            updateTeeOptions();
+        function generateCustomCourseHoles(count) {
+            const holes = [];
+            for (let i = 1; i <= count; i++) {
+                holes.push({ hole: i, par: 4, yards: 350 });
+            }
+            return holes;
         }
 
-        function updateTeeOptions() {
-            const courseId = document.getElementById('select-course').value;
-            const teeContainer = document.getElementById('tee-selection-container');
-            const selectTee = document.getElementById('select-tee');
-            const customContainer = document.getElementById('custom-course-container');
-
-            if (courseId === 'custom') {
-                teeContainer.classList.add('hidden');
-                customContainer.classList.remove('hidden');
-                return;
-            }
-
-            customContainer.classList.add('hidden');
-            const course = coursesJsonData.find(c => c.id === courseId);
-            if (course && course.tees) {
-                teeContainer.classList.remove('hidden');
-                selectTee.innerHTML = '';
-                Object.keys(course.tees).forEach(teeName => {
-                    const opt = document.createElement('option');
-                    opt.value = teeName;
-                    opt.textContent = `${teeName} Tee (Rating: ${course.tees[teeName].rating}, Slope: ${course.tees[teeName].slope})`;
-                    selectTee.appendChild(opt);
-                });
-                if (localState.selectedTee && course.tees[localState.selectedTee]) {
-                    selectTee.value = localState.selectedTee;
-                }
+        function getActiveCourseHoles() {
+            let fullCourse;
+            if (localState.selectedCourseKey === 'custom') {
+                fullCourse = generateCustomCourseHoles(18);
             } else {
-                teeContainer.classList.add('hidden');
+                fullCourse = COURSE_DATABASE[localState.selectedCourseKey || 'kinderhook'].holes;
             }
-        }
-
-        function populateFormValues() {
-            document.getElementById('input-room-code').value = roomCode;
-            populateCourseOptions();
-            document.getElementById('input-custom-course-name').value = localState.customCourseName || '';
-            document.getElementById('select-hole-count').value = localState.holeCount || '18';
-            document.getElementById('select-nine').value = localState.nineSelection || 'front';
-            document.getElementById('toggle-track-group').checked = localState.trackGroupScore !== false;
-            document.getElementById('toggle-track-personal').checked = localState.trackPersonalShots !== false;
-            renderTeamsEditor();
+            const count = parseInt(localState.holeCount || "18", 10);
+            if (count === 18) return fullCourse;
+            if (count === 9) {
+                return localState.nineSelection === 'back' ? fullCourse.slice(9, 18) : fullCourse.slice(0, 9);
+            }
+            if (count === 6) return fullCourse.slice(0, 6);
+            return fullCourse;
         }
 
         function renderTeamsEditor() {
             const container = document.getElementById('teams-editor-container');
             container.innerHTML = '';
 
-            (localState.teams || []).forEach((team, tIdx) => {
-                const teamCard = document.createElement('div');
-                teamCard.className = "bg-emerald-950 p-3 rounded-xl border border-emerald-800 space-y-2";
+            localState.teams.forEach((team, tIdx) => {
+                const card = document.createElement('div');
+                card.className = "bg-emerald-950 p-3.5 rounded-xl border border-emerald-800 space-y-3";
                 
                 let playersHtml = (team.players || []).map((p, pIdx) => `
-                    <div class="flex gap-2">
-                        <input type="text" value="${p || ''}" onchange="updatePlayerName(${tIdx}, ${pIdx}, this.value)" class="flex-1 bg-emerald-900 border border-emerald-700 text-white p-2 rounded-lg text-xs outline-none focus:border-gold-500" placeholder="Golfer Name">
-                        <button onclick="removePlayer(${tIdx}, ${pIdx})" class="px-2 text-red-400 bg-red-950/40 rounded border border-red-900/60 text-xs">✕</button>
+                    <div class="flex items-center gap-2">
+                        <input type="text" value="${p}" data-tidx="${tIdx}" data-pidx="${pIdx}" class="player-name-input flex-1 bg-emerald-900 border border-emerald-700 text-white p-2 rounded text-xs outline-none focus:border-gold-500" placeholder="Player Name">
+                        <button onclick="removePlayer(${tIdx}, ${pIdx})" class="p-2 text-red-400 bg-red-950/40 rounded border border-red-900/50"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                     </div>
                 `).join('');
 
-                teamCard.innerHTML = `
-                    <div class="flex justify-between items-center gap-2">
-                        <input type="text" value="${team.name}" onchange="updateTeamName(${tIdx}, this.value)" class="font-serif font-bold text-gold-400 bg-transparent border-b border-gold-500/30 text-sm p-1 outline-none flex-1" placeholder="Team Name">
-                        <button onclick="removeTeam(${tIdx})" class="text-xs text-red-400 bg-red-950/60 px-2 py-1 rounded border border-red-800">Delete Team</button>
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-2 border-b border-emerald-800/80 pb-2">
+                        <input type="text" value="${team.name}" data-tidx="${tIdx}" class="team-name-input font-serif font-bold text-gold-400 bg-transparent border-b border-dashed border-emerald-700 focus:border-gold-500 outline-none text-sm w-2/3" placeholder="Team Name">
+                        <button onclick="removeTeam(${tIdx})" class="text-[10px] text-red-400 bg-red-950/40 px-2 py-1 rounded border border-red-900/50">Delete Team</button>
                     </div>
-                    <div class="space-y-1.5 pt-1">
-                        <label class="text-[9px] uppercase font-bold text-emerald-400">Golfers</label>
+                    <div class="space-y-2">
+                        <div class="text-[10px] text-emerald-400 uppercase font-bold">Roster Players</div>
                         ${playersHtml}
+                        <button onclick="addPlayer(${tIdx})" class="text-[11px] text-gold-400 font-semibold flex items-center gap-1 mt-1">
+                            <i data-lucide="user-plus" class="w-3 h-3"></i> Add Player
+                        </button>
                     </div>
-                    <button onclick="addPlayer(${tIdx})" class="w-full py-1.5 bg-emerald-900 hover:bg-emerald-850 text-gold-300 border border-emerald-700 text-xs rounded-lg font-medium mt-1">+ Add Golfer</button>
                 `;
-                container.appendChild(teamCard);
+                container.appendChild(card);
             });
+
+            lucide.createIcons();
         }
 
-        window.updateTeamName = (tIdx, val) => { localState.teams[tIdx].name = val; };
-        window.updatePlayerName = (tIdx, pIdx, val) => { localState.teams[tIdx].players[pIdx] = val; };
-        window.removeTeam = (tIdx) => { localState.teams.splice(tIdx, 1); renderTeamsEditor(); };
-        window.addPlayer = (tIdx) => { localState.teams[tIdx].players.push(`Golfer ${localState.teams[tIdx].players.length + 1}`); renderTeamsEditor(); };
-        window.removePlayer = (tIdx, pIdx) => { localState.teams[tIdx].players.splice(pIdx, 1); renderTeamsEditor(); };
+        window.addPlayer = function(tIdx) {
+            localState.teams[tIdx].players.push(`Player ${localState.teams[tIdx].players.length + 1}`);
+            renderTeamsEditor();
+        };
 
-        window.addEventListener('DOMContentLoaded', async () => {
+        window.removePlayer = function(tIdx, pIdx) {
+            localState.teams[tIdx].players.splice(pIdx, 1);
+            renderTeamsEditor();
+        };
+
+        window.removeTeam = function(tIdx) {
+            if (confirm("Delete this team?")) {
+                localState.teams.splice(tIdx, 1);
+                renderTeamsEditor();
+            }
+        };
+
+        function populateForm() {
+            document.getElementById('select-course').value = localState.selectedCourseKey || 'kinderhook';
+            document.getElementById('input-custom-course-name').value = localState.customCourseName || '';
+            document.getElementById('select-hole-count').value = localState.holeCount || '18';
+            document.getElementById('select-nine').value = localState.nineSelection || 'front';
+            document.getElementById('toggle-track-group').checked = localState.trackGroupScore !== false;
+            document.getElementById('toggle-track-personal').checked = localState.trackPersonalShots !== false;
+            
+            const selectedKey = document.getElementById('select-course').value;
+            document.getElementById('custom-course-container').style.display = selectedKey === 'custom' ? 'block' : 'none';
+
+            const count = document.getElementById('select-hole-count').value;
+            document.getElementById('nine-selection-container').style.display = count === '9' ? 'block' : 'none';
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
             updateNavLinks();
-            await fetchCoursesJson();
+            document.getElementById('input-room-code').value = roomCode;
+            populateForm();
+            lucide.createIcons();
 
-            document.getElementById('btn-unlock').onclick = () => {
-                const pass = document.getElementById('input-password').value;
-                if (pass === '2026' || pass === 'flynn' || pass === 'admin' || pass === '') {
-                    document.getElementById('password-gate').classList.add('hidden');
-                    document.getElementById('admin-content').classList.remove('hidden');
-                    populateFormValues();
-                } else {
-                    alert("Incorrect Password!");
-                }
+            document.getElementById('select-course').onchange = (e) => {
+                document.getElementById('custom-course-container').style.display = e.target.value === 'custom' ? 'block' : 'none';
             };
 
-            document.getElementById('select-course').onchange = updateTeeOptions;
+            document.getElementById('select-hole-count').onchange = (e) => {
+                document.getElementById('nine-selection-container').style.display = e.target.value === '9' ? 'block' : 'none';
+            };
+
+            document.getElementById('btn-unlock').onclick = () => {
+                const pass = document.getElementById('input-password').value.trim();
+                if (pass === 'cflynn') {
+                    document.getElementById('password-gate').classList.add('hidden');
+                    document.getElementById('admin-content').classList.remove('hidden');
+                    renderTeamsEditor();
+                } else {
+                    alert("Incorrect password!");
+                }
+            };
 
             document.getElementById('btn-add-team').onclick = () => {
                 localState.teams.push({
                     name: `Team ${localState.teams.length + 1}`,
-                    players: ["Golfer 1", "Golfer 2"],
+                    players: ["Player 1", "Player 2"],
                     holes: []
                 });
                 renderTeamsEditor();
             };
 
-            document.getElementById('btn-apply-room-code').onclick = () => {
-                const newCode = (document.getElementById('input-room-code').value || 'FLYNN26').trim().toUpperCase();
-                window.location.href = `setup.html?room=${newCode}`;
-            };
-
             document.getElementById('btn-save-settings').onclick = () => {
+                // Archive current active round scores into history before resetting for the new round
+                if (!Array.isArray(localState.history)) localState.history = [];
+
+                const roundPlayerTotals = {};
+                let hasActiveData = false;
+
+                (localState.teams || []).forEach(t => {
+                    (t.players || []).forEach((p, pIdx) => {
+                        const count = (t.holes || []).reduce((sum, h) => sum + ((h && h.playerShots && h.playerShots[pIdx]) || 0), 0);
+                        if (count > 0 && p) {
+                            roundPlayerTotals[p] = (roundPlayerTotals[p] || 0) + count;
+                            hasActiveData = true;
+                        }
+                    });
+                });
+
+                if (hasActiveData) {
+                    const cName = localState.selectedCourseKey === 'custom' ? (localState.customCourseName || "Custom Course") : (COURSE_DATABASE[localState.selectedCourseKey]?.name || "Golf Course");
+                    localState.history.push({
+                        timestamp: new Date().toISOString(),
+                        courseName: cName,
+                        playerTotals: roundPlayerTotals
+                    });
+                }
+
+                // Apply new configuration
                 localState.selectedCourseKey = document.getElementById('select-course').value;
-                localState.selectedTee = document.getElementById('select-tee').value;
-                localState.customCourseName = document.getElementById('input-custom-course-name').value;
+                localState.customCourseName = document.getElementById('input-custom-course-name').value.trim();
                 localState.holeCount = document.getElementById('select-hole-count').value;
                 localState.nineSelection = document.getElementById('select-nine').value;
                 localState.trackGroupScore = document.getElementById('toggle-track-group').checked;
                 localState.trackPersonalShots = document.getElementById('toggle-track-personal').checked;
 
-                syncToFirebaseAndLocal();
-                alert("Setup saved and applied successfully!");
+                document.querySelectorAll('.team-name-input').forEach(input => {
+                    const tIdx = parseInt(input.dataset.tidx, 10);
+                    localState.teams[tIdx].name = input.value.trim() || `Team ${tIdx + 1}`;
+                });
+
+                document.querySelectorAll('.player-name-input').forEach(input => {
+                    const tIdx = parseInt(input.dataset.tidx, 10);
+                    const pIdx = parseInt(input.dataset.pidx, 10);
+                    localState.teams[tIdx].players[pIdx] = input.value.trim() || `Player ${pIdx + 1}`;
+                });
+
+                const activeHoles = getActiveCourseHoles();
+                localState.teams.forEach(t => {
+                    t.holes = activeHoles.map(h => ({
+                        score: 0,
+                        playerShots: Array((t.players || []).length).fill(0),
+                        completed: false
+                    }));
+                });
+
+                saveState();
+                alert("Setup saved! Previous round shots were archived to the multi-round leaderboard.");
+            };
+
+            document.getElementById('btn-apply-room-code').onclick = () => {
+                const code = document.getElementById('input-room-code').value.trim().toUpperCase();
+                if (code) {
+                    window.location.href = `setup.html?room=${code}`;
+                }
             };
 
             document.getElementById('btn-clear-course-scores').onclick = () => {
-                if (confirm("Are you sure you want to clear active round scores for all teams?")) {
-                    (localState.teams || []).forEach(t => t.holes = []);
-                    syncToFirebaseAndLocal();
+                if (confirm("Clear scores for the active round? Unplayed holes will start at 0.")) {
+                    const activeHoles = getActiveCourseHoles();
+                    localState.teams.forEach(t => {
+                        t.holes = activeHoles.map(h => ({
+                            score: 0,
+                            playerShots: Array((t.players || []).length).fill(0),
+                            completed: false
+                        }));
+                    });
+                    saveState();
                     alert("Active round scores cleared!");
                 }
             };
 
             document.getElementById('btn-clear-all-history').onclick = () => {
-                if (confirm("Are you sure you want to clear ALL historical round data?")) {
+                if (confirm("Clear active round scores AND all accumulated history across all rounds?")) {
+                    const activeHoles = getActiveCourseHoles();
+                    localState.teams.forEach(t => {
+                        t.holes = activeHoles.map(h => ({
+                            score: 0,
+                            playerShots: Array((t.players || []).length).fill(0),
+                            completed: false
+                        }));
+                    });
                     localState.history = [];
-                    (localState.teams || []).forEach(t => t.holes = []);
-                    syncToFirebaseAndLocal();
-                    alert("All round history reset!");
+                    saveState();
+                    alert("All course scores and multi-round history cleared!");
                 }
             };
-
-            lucide.createIcons();
         });
     </script>
 </body>

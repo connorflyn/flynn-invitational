@@ -108,7 +108,7 @@
             </div>
 
             <!-- Active Course Individual Shot Tracker -->
-            <div class="bg-emerald-900/40 p-4 rounded-xl border border-emerald-800/80 space-y-3">
+            <div id="active-round-mvp-box" class="bg-emerald-900/40 p-4 rounded-xl border border-emerald-800/80 space-y-3">
                 <h3 class="font-serif font-bold text-white text-sm flex items-center gap-2">
                     <i data-lucide="pie-chart" class="w-4 h-4 text-gold-400"></i> Active Round Shot Contributions
                 </h3>
@@ -127,7 +127,7 @@
                 <h3 class="font-serif font-bold text-gold-400 text-base flex items-center gap-2">
                     <i data-lucide="award" class="w-5 h-5 text-gold-400"></i> Running Shot Contributions Across All Rounds
                 </h3>
-                <p class="text-[11px] text-emerald-300/80">Cumulative shots used per player across all played rounds and reshuffled team rosters.</p>
+                <p class="text-[11px] text-emerald-300/80">Cumulative shots used per player across all played courses and team setups.</p>
                 <div id="all-round-mvp-container" class="space-y-2 pt-1"></div>
             </div>
 
@@ -217,9 +217,11 @@
             return {
                 roomCode: roomCode,
                 selectedCourseKey: "kinderhook",
+                customCourseName: "",
                 holeCount: "18",
                 nineSelection: "front",
                 trackGroupScore: true,
+                trackPersonalShots: true,
                 teams: [],
                 history: []
             };
@@ -227,8 +229,21 @@
 
         let localState = loadLocalState();
 
+        function generateCustomCourseHoles(count) {
+            const holes = [];
+            for (let i = 1; i <= count; i++) {
+                holes.push({ hole: i, par: 4, yards: 350 });
+            }
+            return holes;
+        }
+
         function getActiveCourseHoles() {
-            const fullCourse = COURSE_DATABASE[localState.selectedCourseKey || 'kinderhook'].holes;
+            let fullCourse;
+            if (localState.selectedCourseKey === 'custom') {
+                fullCourse = generateCustomCourseHoles(18);
+            } else {
+                fullCourse = COURSE_DATABASE[localState.selectedCourseKey || 'kinderhook'].holes;
+            }
             const count = parseInt(localState.holeCount || "18", 10);
             if (count === 18) return fullCourse;
             if (count === 9) {
@@ -274,8 +289,11 @@
         }
 
         function renderLeaderboard() {
-            const courseInfo = COURSE_DATABASE[localState.selectedCourseKey || 'kinderhook'];
-            document.getElementById('active-course-heading').textContent = `${courseInfo.name} (${localState.holeCount || 18} Holes)`;
+            const courseName = localState.selectedCourseKey === 'custom' 
+                ? (localState.customCourseName || "Custom Course") 
+                : COURSE_DATABASE[localState.selectedCourseKey || 'kinderhook'].name;
+
+            document.getElementById('active-course-heading').textContent = `${courseName} (${localState.holeCount || 18} Holes)`;
 
             const container = document.getElementById('leaderboard-cards-container');
             if (!container) return;
@@ -344,7 +362,7 @@
                 indStatsContainer.appendChild(block);
             });
 
-            // Multi-Round History Integration
+            // Aggregate Multi-Round History
             if (Array.isArray(localState.history)) {
                 localState.history.forEach(pastRound => {
                     if (pastRound && pastRound.playerTotals) {
